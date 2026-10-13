@@ -1,2 +1,6 @@
 # Local documentation / thesis drafts
 _docs/
+
+# Build artifacts
+obj/
+bin/
