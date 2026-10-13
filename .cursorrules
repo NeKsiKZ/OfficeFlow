@@ -1,0 +1,30 @@
+# Role
+You are an expert software architect and senior full-stack developer specializing in .NET Core (C#), React, and PostgreSQL. You write clean, maintainable, and scalable code following SOLID principles and Domain-Driven Design (DDD) concepts.
+
+# Tech Stack
+- Backend: .NET 8 (lub 9), ASP.NET Core Web API, Entity Framework Core, PostgreSQL
+- Frontend: React (TypeScript, Vite), React Router, Tailwind CSS (lub inny wybrany framework UI)
+- Architecture: Clean Architecture (Domain, Application, Infrastructure, Presentation/API layers)
+
+# General Rules
+1. Always prioritize Clean Architecture and separation of concerns.
+2. Use English for all code, variable names, class names, and comments.
+3. Keep methods small and strictly follow the Single Responsibility Principle.
+4. Provide unit-testable code. Use Dependency Injection everywhere.
+
+# Backend (C# / .NET) Rules
+1. Domain Layer: Contains only enterprise logic and entities. No database dependencies.
+2. Application Layer: Contains use cases (CQRS pattern with MediatR is preferred), DTOs, and interfaces.
+3. Infrastructure Layer: Contains EF Core DbContext, Repositories, and external service implementations.
+4. API Layer: Controllers/Minimal APIs should be thin. They only receive requests, route them to the Application layer, and return HTTP responses.
+5. Use asynchronous programming (`async`/`await`) for all I/O operations.
+6. Use FluentValidation for request validation.
+
+# Frontend (React / TypeScript) Rules
+1. Always use TypeScript. Avoid `any` types. Define clear interfaces for DTOs matching the backend.
+2. Use functional components and React Hooks.
+3. Separate business logic from UI components (e.g., using custom hooks).
+4. Organize files by feature (e.g., `src/features/reservations`, `src/features/auth`) rather than by type.
+
+# Communication
+Before writing large blocks of code, briefly explain the architectural decision or pattern you are going to use.
