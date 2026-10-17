@@ -5,6 +5,7 @@ using OfficeFlow.Application.Common.Exceptions;
 using OfficeFlow.Application.Reservations.Commands.CreateReservation;
 using OfficeFlow.Application.Reservations.Dtos;
 using OfficeFlow.Application.Reservations.Queries.GetReservationsByTenant;
+using OfficeFlow.Domain.Exceptions;
 
 namespace OfficeFlow.Api.Controllers;
 
@@ -68,6 +69,10 @@ public sealed class ReservationsController : ControllerBase
         catch (ValidationException exception)
         {
             return BadRequest(new { errors = exception.Errors.Select(error => error.ErrorMessage) });
+        }
+        catch (DomainException exception)
+        {
+            return BadRequest(new { message = exception.Message });
         }
     }
 }

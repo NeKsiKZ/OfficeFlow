@@ -2,6 +2,8 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OfficeFlow.Application.Tenants.Commands.CreateTenant;
+using OfficeFlow.Application.Tenants.Dtos;
+using OfficeFlow.Application.Tenants.Queries.GetTenants;
 using OfficeFlow.Domain.Exceptions;
 
 namespace OfficeFlow.Api.Controllers;
@@ -15,6 +17,15 @@ public sealed class TenantsController : ControllerBase
     public TenantsController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<TenantDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<TenantDto>>> GetAll(
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetTenantsQuery(), cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -34,7 +45,7 @@ public sealed class TenantsController : ControllerBase
         try
         {
             var result = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(Create), new { id = result.TenantId }, result);
+            return CreatedAtAction(nameof(GetAll), new { id = result.TenantId }, result);
         }
         catch (ValidationException exception)
         {
