@@ -29,4 +29,11 @@ public sealed class ReservationRepository : IReservationRepository
             .OrderByDescending(reservation => reservation.CreatedAtUtc)
             .ToListAsync(cancellationToken);
     }
+
+    public Task<bool> ExistsForSpaceAsync(Guid spaceId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Reservations
+            .AsNoTracking()
+            .AnyAsync(reservation => reservation.SpaceId == spaceId, cancellationToken);
+    }
 }

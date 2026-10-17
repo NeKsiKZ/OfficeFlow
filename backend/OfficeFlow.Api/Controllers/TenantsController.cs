@@ -1,6 +1,8 @@
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OfficeFlow.Application.Common.Security;
 using OfficeFlow.Application.Tenants.Commands.CreateTenant;
 using OfficeFlow.Application.Tenants.Dtos;
 using OfficeFlow.Application.Tenants.Queries.GetTenants;
@@ -10,6 +12,7 @@ namespace OfficeFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class TenantsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -29,6 +32,7 @@ public sealed class TenantsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = Roles.Manager)]
     [ProducesResponseType(typeof(CreateTenantResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateTenantResult>> Create(

@@ -1,10 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --of-bg: #f2f2f7;
+    --of-bg-elevated: rgba(255, 255, 255, 0.72);
+    --of-bg-solid: #ffffff;
+    --of-ink: #1c1c1e;
+    --of-ink-secondary: #636366;
+    --of-separator: rgba(60, 60, 67, 0.12);
+    --of-fill: rgba(120, 120, 128, 0.12);
+    --of-fill-strong: rgba(120, 120, 128, 0.2);
+    --of-brand: #245a4c;
+    --of-brand-soft: rgba(36, 90, 76, 0.12);
+    --of-danger: #c9342e;
+    --of-blur: 20px;
+    --of-spring: cubic-bezier(0.32, 0.72, 0, 1);
+    color-scheme: light;
+  }
+
   html,
   body,
   #root {
@@ -12,9 +27,288 @@
   }
 
   body {
-    @apply bg-stone-100 text-stone-900 antialiased;
+    @apply font-sans antialiased text-ink-900;
+    background-color: var(--of-bg);
     background-image:
-      radial-gradient(circle at top left, rgba(47, 111, 94, 0.08), transparent 40%),
-      linear-gradient(180deg, #f5f5f4 0%, #eceae6 100%);
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(47, 111, 94, 0.14), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 90% 0%, rgba(90, 120, 160, 0.08), transparent 50%),
+      linear-gradient(180deg, #f7f7fa 0%, var(--of-bg) 40%, #ebebf0 100%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: var(--of-brand-soft);
+  }
+}
+
+@layer components {
+  .of-display {
+    @apply text-[1.75rem] font-semibold leading-[1.1] tracking-[-0.02em] text-ink-900 sm:text-[2rem];
+  }
+
+  .of-title {
+    @apply text-[1.375rem] font-semibold leading-tight tracking-[-0.015em] text-ink-900;
+  }
+
+  .of-body {
+    @apply text-[0.9375rem] leading-relaxed tracking-[0.01em] text-ink-500;
+  }
+
+  .of-caption {
+    @apply text-[0.8125rem] font-medium leading-snug tracking-[0.01em] text-ink-400;
+  }
+
+  .of-label {
+    @apply text-[0.8125rem] font-medium leading-snug tracking-[0.01em] text-ink-600;
+  }
+
+  /* Translucent functional layer — content scrolls underneath */
+  .of-material {
+    background: var(--of-bg-elevated);
+    backdrop-filter: blur(var(--of-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--of-blur)) saturate(180%);
+    box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.55);
+  }
+
+  .of-material-thick {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.65),
+      0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  .of-surface {
+    @apply rounded-[18px] shadow-material;
+    background: var(--of-bg-solid);
+    border: 0.5px solid var(--of-separator);
+  }
+
+  .of-toolbar {
+    @apply of-material sticky top-0 z-30;
+    border-bottom: 0.5px solid var(--of-separator);
+  }
+
+  .of-toolbar::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset-inline: 0;
+    bottom: -12px;
+    height: 12px;
+    background: linear-gradient(to bottom, rgba(242, 242, 247, 0.55), transparent);
+  }
+
+  .of-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-control px-4 py-2.5 text-[0.9375rem] font-semibold tracking-[-0.01em];
+    @apply transition-[transform,background-color,opacity,box-shadow] duration-press ease-out;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600;
+    @apply disabled:pointer-events-none disabled:opacity-40;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .of-btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .of-btn-primary {
+    @apply of-btn bg-brand-600 text-white shadow-sm;
+  }
+
+  .of-btn-primary:hover:not(:disabled) {
+    @apply bg-brand-700;
+  }
+
+  .of-btn-secondary {
+    @apply of-btn text-ink-700;
+    background: var(--of-fill);
+  }
+
+  .of-btn-secondary:hover:not(:disabled) {
+    background: var(--of-fill-strong);
+  }
+
+  .of-btn-ghost {
+    @apply of-btn text-ink-600;
+    background: transparent;
+  }
+
+  .of-btn-ghost:hover:not(:disabled) {
+    background: var(--of-fill);
+  }
+
+  .of-btn-danger {
+    @apply of-btn text-[color:var(--of-danger)];
+    background: rgba(201, 52, 46, 0.1);
+  }
+
+  .of-btn-danger:hover:not(:disabled) {
+    background: rgba(201, 52, 46, 0.16);
+  }
+
+  .of-nav-pill {
+    @apply of-btn rounded-pill px-3.5 py-1.5 text-[0.875rem] font-medium text-ink-600;
+  }
+
+  a.of-nav-pill:not(.bg-brand-600):hover {
+    background: var(--of-fill);
+  }
+
+  .of-field {
+    @apply w-full rounded-control px-3.5 py-[0.7rem] text-[0.9375rem] text-ink-900 outline-none;
+    @apply transition-[box-shadow,background-color] duration-press ease-out;
+    background: rgba(118, 118, 128, 0.08);
+    border: 0.5px solid transparent;
+  }
+
+  .of-field:hover {
+    background: rgba(118, 118, 128, 0.12);
+  }
+
+  .of-field:focus {
+    background: #fff;
+    border-color: rgba(36, 90, 76, 0.35);
+    box-shadow: 0 0 0 3px var(--of-brand-soft);
+  }
+
+  .of-alert {
+    @apply rounded-[14px] px-4 py-3.5 text-[0.875rem] leading-relaxed;
+    border: 0.5px solid transparent;
+  }
+
+  .of-alert-error {
+    @apply of-alert text-red-800;
+    background: rgba(201, 52, 46, 0.08);
+    border-color: rgba(201, 52, 46, 0.18);
+  }
+
+  .of-alert-success {
+    @apply of-alert text-emerald-900;
+    background: rgba(36, 138, 88, 0.1);
+    border-color: rgba(36, 138, 88, 0.18);
+  }
+
+  .of-alert-info {
+    @apply of-alert text-ink-700;
+    background: var(--of-fill);
+  }
+
+  .of-scrim {
+    @apply fixed inset-0 z-40;
+    background: rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: opacity 0.32s var(--of-spring);
+  }
+
+  .of-sheet {
+    @apply fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 24px 80px rgba(0, 0, 0, 0.18);
+    transition:
+      transform 0.38s var(--of-spring),
+      opacity 0.38s var(--of-spring);
+    will-change: transform;
+  }
+
+  .of-map-tile {
+    @apply absolute flex flex-col items-center justify-center overflow-hidden rounded-[10px] border px-1 text-center;
+    @apply transition-[transform,box-shadow,background-color,border-color] duration-press ease-out;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+  }
+
+  .of-map-tile:active {
+    transform: scale(0.96);
+  }
+
+  .of-spinner {
+    @apply inline-block h-5 w-5 animate-spin rounded-full border-2 border-brand-600 border-r-transparent;
+  }
+
+  .of-enter {
+    animation: of-fade-rise 0.4s var(--of-spring) both;
+  }
+
+  .of-enter-delayed {
+    animation: of-fade-rise 0.45s var(--of-spring) 0.06s both;
+  }
+}
+
+@layer utilities {
+  .of-separator {
+    border-color: var(--of-separator);
+  }
+}
+
+@keyframes of-fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .of-btn:active:not(:disabled),
+  .of-map-tile:active {
+    transform: none;
+  }
+
+  .of-sheet {
+    transition: opacity 0.2s ease !important;
+  }
+
+  .of-enter,
+  .of-enter-delayed {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .of-material,
+  .of-material-thick,
+  .of-toolbar,
+  .of-sheet {
+    background: #fff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .of-scrim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.45);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .of-surface,
+  .of-material,
+  .of-sheet {
+    border: 1px solid #1c1c1e;
+  }
+
+  .of-field {
+    border: 1px solid #636366;
+    background: #fff;
   }
 }

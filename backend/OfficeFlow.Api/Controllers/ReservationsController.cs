@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfficeFlow.Application.Common.Exceptions;
 using OfficeFlow.Application.Reservations.Commands.CreateReservation;
@@ -11,6 +12,7 @@ namespace OfficeFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class ReservationsController : ControllerBase
 {
     private readonly IMediator _mediator;

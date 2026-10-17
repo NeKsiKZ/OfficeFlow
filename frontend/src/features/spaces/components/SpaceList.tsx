@@ -1,3 +1,4 @@
+import { LoadingBlock, StatusBlock } from '../../../components/ui/StatusBlock'
 import { formatSpaceRate, getSpaceTypeLabel } from '../types'
 import { useSpaces } from '../hooks/useSpaces'
 
@@ -5,39 +6,30 @@ export function SpaceList() {
   const { spaces, isLoading, error, refetch } = useSpaces()
 
   if (isLoading) {
-    return (
-      <div
-        className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white/70 px-4 py-6 text-stone-600"
-        role="status"
-        aria-live="polite"
-      >
-        <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-brand-600 border-r-transparent" />
-        Loading spaces...
-      </div>
-    )
+    return <LoadingBlock label="Loading spaces..." />
   }
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-5 text-red-800">
-        <p className="font-medium">Could not load spaces</p>
-        <p className="mt-1 text-sm">{error}</p>
-        <button
-          type="button"
-          onClick={refetch}
-          className="mt-3 rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800"
-        >
-          Try again
-        </button>
-      </div>
+      <StatusBlock
+        tone="error"
+        title="Could not load spaces"
+        action={
+          <button type="button" onClick={refetch} className="of-btn-primary">
+            Try again
+          </button>
+        }
+      >
+        {error}
+      </StatusBlock>
     )
   }
 
   if (spaces.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-stone-300 bg-white/60 px-4 py-8 text-center text-stone-600">
+      <StatusBlock>
         No spaces found. Create one via the API, then refresh this page.
-      </div>
+      </StatusBlock>
     )
   }
 
@@ -46,24 +38,26 @@ export function SpaceList() {
       {spaces.map((space) => (
         <article
           key={space.id}
-          className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-brand-500/40 hover:shadow-md"
+          className="of-surface of-enter-delayed flex flex-col gap-3 p-5 transition-[transform,box-shadow] duration-press hover:shadow-md active:scale-[0.99]"
         >
           <div className="flex items-start justify-between gap-3">
-            <h2 className="text-lg font-semibold text-stone-900">{space.name}</h2>
-            <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
+            <h2 className="text-lg font-semibold tracking-[-0.015em] text-ink-900">
+              {space.name}
+            </h2>
+            <span className="shrink-0 rounded-pill bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
               {getSpaceTypeLabel(space.type)}
             </span>
           </div>
 
-          <p className="text-sm text-stone-500">Code: {space.code}</p>
+          <p className="of-caption">Code: {space.code}</p>
 
           {space.description ? (
-            <p className="line-clamp-2 text-sm text-stone-600">{space.description}</p>
+            <p className="of-body line-clamp-2">{space.description}</p>
           ) : null}
 
-          <div className="mt-auto border-t border-stone-100 pt-3">
-            <p className="text-xs uppercase tracking-wide text-stone-400">Rate</p>
-            <p className="text-base font-semibold text-brand-700">
+          <div className="mt-auto border-t border-[color:var(--of-separator)] pt-3">
+            <p className="of-caption">Rate</p>
+            <p className="text-base font-semibold tracking-[-0.01em] text-brand-700">
               {formatSpaceRate(space)}
             </p>
           </div>

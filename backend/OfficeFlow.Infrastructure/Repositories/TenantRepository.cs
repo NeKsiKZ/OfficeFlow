@@ -21,6 +21,15 @@ public sealed class TenantRepository : ITenantRepository
             .FirstOrDefaultAsync(tenant => tenant.Id == id, cancellationToken);
     }
 
+    public async Task<Tenant?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var normalized = email.Trim().ToLowerInvariant();
+
+        return await _dbContext.Tenants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(tenant => tenant.Email == normalized, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Tenant>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Tenants

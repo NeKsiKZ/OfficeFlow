@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OfficeFlow.Application.Common.Interfaces;
+using OfficeFlow.Application.Common.Options;
+using OfficeFlow.Infrastructure.Auth;
 using OfficeFlow.Infrastructure.Persistence;
 using OfficeFlow.Infrastructure.Repositories;
 
@@ -17,6 +19,8 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException(
                 "Connection string 'DefaultConnection' was not found.");
 
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
 
@@ -24,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
         return services;
     }

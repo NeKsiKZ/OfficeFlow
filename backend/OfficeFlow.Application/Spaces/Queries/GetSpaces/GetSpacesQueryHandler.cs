@@ -19,7 +19,12 @@ public sealed class GetSpacesQueryHandler
         GetSpacesQuery request,
         CancellationToken cancellationToken)
     {
-        var spaces = await _spaceRepository.GetAllAsync(request.Type, cancellationToken);
+        var spaces = await _spaceRepository.GetAllAsync(
+            request.Type,
+            request.MinPrice,
+            request.MaxPrice,
+            cancellationToken);
+
         return spaces.Select(space => space.ToDto()).ToList();
     }
 }

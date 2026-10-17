@@ -1,17 +1,21 @@
+import { PageHeader } from '../../../components/ui/PageHeader'
+
 export function ReservationsPage() {
   return (
-    <section className="space-y-3">
-      <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
-        Reservations
-      </h1>
-      <p className="max-w-2xl text-stone-600">
-        Tenant reservation history will appear here. Backend queries are ready
-        via{' '}
-        <code className="rounded bg-stone-200 px-1.5 py-0.5 text-sm">
-          GET /api/reservations?tenantId=...
-        </code>
-        .
-      </p>
+    <section className="space-y-4">
+      <PageHeader
+        title="Reservations"
+        description="Tenant reservation history will appear here. Backend queries are ready via GET /api/reservations?tenantId=..."
+      />
+      <div className="of-surface of-enter-delayed p-5">
+        <p className="of-body">
+          Use{' '}
+          <span className="rounded-md bg-ink-100 px-1.5 py-0.5 font-medium text-ink-700">
+            My reservations
+          </span>{' '}
+          as a tenant, or open a space on the map to create a booking.
+        </p>
+      </div>
     </section>
   )
 }

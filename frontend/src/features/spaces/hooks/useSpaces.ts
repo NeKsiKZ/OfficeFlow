@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import { fetchSpaces } from '../spacesApi'
-import type { Space, SpaceType } from '../types'
+import { fetchSpaces, type SpaceFilters } from '../spacesApi'
+import type { Space } from '../types'
 
 interface UseSpacesResult {
   spaces: Space[]
@@ -26,7 +26,7 @@ function getErrorMessage(error: unknown): string {
   return 'Failed to load spaces from the API.'
 }
 
-export function useSpaces(type?: SpaceType): UseSpacesResult {
+export function useSpaces(filters: SpaceFilters = {}): UseSpacesResult {
   const [spaces, setSpaces] = useState<Space[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +40,7 @@ export function useSpaces(type?: SpaceType): UseSpacesResult {
       setError(null)
 
       try {
-        const data = await fetchSpaces(type)
+        const data = await fetchSpaces(filters)
         if (isActive) {
           setSpaces(data)
         }
@@ -61,7 +61,7 @@ export function useSpaces(type?: SpaceType): UseSpacesResult {
     return () => {
       isActive = false
     }
-  }, [type, reloadToken])
+  }, [filters.type, filters.minPrice, filters.maxPrice, reloadToken])
 
   return {
     spaces,

@@ -6,6 +6,7 @@ public sealed record ReservationDto(
     Guid Id,
     Guid TenantId,
     Guid SpaceId,
+    string SpaceName,
     SpaceType SpaceType,
     DateTime StartTimeUtc,
     DateTime EndTimeUtc,

@@ -1,54 +1,52 @@
+import { useState } from 'react'
+import { PageHeader } from '../../../components/ui/PageHeader'
+import { LoadingBlock, StatusBlock } from '../../../components/ui/StatusBlock'
 import { useSpaces } from '../hooks/useSpaces'
+import type { SpaceFilters } from '../spacesApi'
 import { OfficeMap } from './OfficeMap'
+import { SpaceFilterBar } from './SpaceFilterBar'
 
 export function SpacesPage() {
-  const { spaces, isLoading, error, refetch } = useSpaces()
+  const [filters, setFilters] = useState<SpaceFilters>({})
+  const { spaces, isLoading, error, refetch } = useSpaces(filters)
 
   return (
     <section className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
-          Office map
-        </h1>
-        <p className="max-w-2xl text-stone-600">
-          Click a desk, room, or parking spot on the floor plan to view details
-          and start a reservation.
-        </p>
+      <PageHeader
+        title="Office map"
+        description="Filter available spaces, then press a desk, room, or parking spot to view details and reserve."
+      />
+
+      <div className="of-enter-delayed">
+        <SpaceFilterBar filters={filters} onChange={setFilters} />
       </div>
 
-      {isLoading ? (
-        <div
-          className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white/70 px-4 py-6 text-stone-600"
-          role="status"
-          aria-live="polite"
-        >
-          <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-brand-600 border-r-transparent" />
-          Loading office map...
-        </div>
-      ) : null}
+      {isLoading ? <LoadingBlock label="Loading office map..." /> : null}
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-5 text-red-800">
-          <p className="font-medium">Could not load spaces</p>
-          <p className="mt-1 text-sm">{error}</p>
-          <button
-            type="button"
-            onClick={refetch}
-            className="mt-3 rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800"
-          >
-            Try again
-          </button>
-        </div>
+        <StatusBlock
+          tone="error"
+          title="Could not load spaces"
+          action={
+            <button type="button" onClick={refetch} className="of-btn-primary">
+              Try again
+            </button>
+          }
+        >
+          {error}
+        </StatusBlock>
       ) : null}
 
       {!isLoading && !error && spaces.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-stone-300 bg-white/60 px-4 py-8 text-center text-stone-600">
-          No spaces found. Create spaces via the API, then refresh this page.
-        </div>
+        <StatusBlock>
+          No spaces match the selected filters.
+        </StatusBlock>
       ) : null}
 
       {!isLoading && !error && spaces.length > 0 ? (
-        <OfficeMap spaces={spaces} />
+        <div className="of-enter-delayed">
+          <OfficeMap spaces={spaces} />
+        </div>
       ) : null}
     </section>
   )

@@ -1,18 +1,19 @@
-using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OfficeFlow.Application.Common.Exceptions;
+using OfficeFlow.Application.Common.Security;
 using OfficeFlow.Application.Spaces.Commands.CreateSpace;
+using OfficeFlow.Application.Spaces.Commands.DeleteSpace;
 using OfficeFlow.Application.Spaces.Dtos;
 using OfficeFlow.Application.Spaces.Queries.GetSpaceById;
 using OfficeFlow.Application.Spaces.Queries.GetSpaces;
 using OfficeFlow.Domain.Enums;
-using OfficeFlow.Domain.Exceptions;
 
 namespace OfficeFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public sealed class SpacesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -26,9 +27,14 @@ public sealed class SpacesController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<SpaceDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<SpaceDto>>> GetAll(
         [FromQuery] SpaceType? type,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
         CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetSpacesQuery(type), cancellationToken);
+        var result = await _mediator.Send(
+            new GetSpacesQuery(type, minPrice, maxPrice),
+            cancellationToken);
+
         return Ok(result);
     }
 
@@ -39,18 +45,12 @@ public sealed class SpacesController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await _mediator.Send(new GetSpaceByIdQuery(id), cancellationToken);
-            return Ok(result);
-        }
-        catch (NotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
+        var result = await _mediator.Send(new GetSpaceByIdQuery(id), cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]
+    [Authorize(Roles = Roles.Manager)]
     [ProducesResponseType(typeof(CreateSpaceResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateSpaceResult>> Create(
@@ -72,19 +72,19 @@ public sealed class SpacesController : ControllerBase
             request.Description,
             request.Currency ?? "PLN");
 
-        try
-        {
-            var result = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = result.SpaceId }, result);
-        }
-        catch (ValidationException exception)
-        {
-            return BadRequest(new { errors = exception.Errors.Select(error => error.ErrorMessage) });
-        }
-        catch (DomainException exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
+        var result = await _mediator.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = result.SpaceId }, result);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = Roles.Manager)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new DeleteSpaceCommand(id), cancellationToken);
+        return NoContent();
     }
 }
 

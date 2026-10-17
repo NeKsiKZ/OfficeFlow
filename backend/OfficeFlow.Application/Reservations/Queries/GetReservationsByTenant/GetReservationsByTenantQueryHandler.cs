@@ -9,10 +9,14 @@ public sealed class GetReservationsByTenantQueryHandler
     : IRequestHandler<GetReservationsByTenantQuery, IReadOnlyList<ReservationDto>>
 {
     private readonly IReservationRepository _reservationRepository;
+    private readonly ISpaceRepository _spaceRepository;
 
-    public GetReservationsByTenantQueryHandler(IReservationRepository reservationRepository)
+    public GetReservationsByTenantQueryHandler(
+        IReservationRepository reservationRepository,
+        ISpaceRepository spaceRepository)
     {
         _reservationRepository = reservationRepository;
+        _spaceRepository = spaceRepository;
     }
 
     public async Task<IReadOnlyList<ReservationDto>> Handle(
@@ -23,6 +27,14 @@ public sealed class GetReservationsByTenantQueryHandler
             request.TenantId,
             cancellationToken);
 
-        return reservations.Select(reservation => reservation.ToDto()).ToList();
+        var results = new List<ReservationDto>(reservations.Count);
+
+        foreach (var reservation in reservations)
+        {
+            var space = await _spaceRepository.GetByIdAsync(reservation.SpaceId, cancellationToken);
+            results.Add(reservation.ToDto(space?.Name));
+        }
+
+        return results;
     }
 }

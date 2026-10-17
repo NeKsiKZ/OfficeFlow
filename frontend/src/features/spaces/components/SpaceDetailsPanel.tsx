@@ -169,45 +169,36 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
         aria-label="Close details"
         onClick={handleClose}
         className={[
-          'fixed inset-0 z-40 bg-stone-900/30 transition-opacity',
+          'of-scrim',
           isOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
         ].join(' ')}
       />
 
       <aside
         className={[
-          'fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-stone-200 bg-white shadow-2xl transition-transform duration-300 ease-out',
-          isOpen ? 'translate-x-0' : 'translate-x-full',
+          'of-sheet',
+          isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0',
         ].join(' ')}
         aria-hidden={!isOpen}
         aria-label="Space details"
       >
         {space ? (
           <>
-            <div className="flex items-start justify-between gap-4 border-b border-stone-100 px-6 py-5">
+            <div className="of-material flex items-start justify-between gap-4 border-b border-[color:var(--of-separator)] px-6 py-5">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-brand-600">
+                <p className="of-caption text-brand-600">
                   {mode === 'form' ? 'New reservation' : 'Selected space'}
                 </p>
-                <h2 className="mt-1 text-2xl font-semibold text-stone-900">
-                  {space.name}
-                </h2>
+                <h2 className="of-title mt-1">{space.name}</h2>
               </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-md px-2 py-1 text-sm text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-              >
+              <button type="button" onClick={handleClose} className="of-btn-ghost">
                 Close
               </button>
             </div>
 
             <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
               {successMessage ? (
-                <div
-                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-medium text-emerald-800"
-                  role="status"
-                >
+                <div className="of-alert-success" role="status">
                   {successMessage}
                 </div>
               ) : null}
@@ -248,15 +239,13 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
                   onSubmit={handleSubmit}
                 >
                   <label className="block space-y-1.5">
-                    <span className="text-xs uppercase tracking-wide text-stone-400">
-                      Najemca
-                    </span>
+                    <span className="of-label">Najemca</span>
                     <select
                       required
                       value={tenantId}
                       onChange={(event) => setTenantId(event.target.value)}
                       disabled={isLoadingTenants || tenants.length === 0}
-                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 outline-none ring-brand-500 focus:ring-2"
+                      className="of-field"
                     >
                       {isLoadingTenants ? (
                         <option value="">Loading tenants...</option>
@@ -273,46 +262,40 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
                   </label>
 
                   {tenantsError ? (
-                    <p className="text-sm text-red-700">{tenantsError}</p>
+                    <p className="of-alert-error">{tenantsError}</p>
                   ) : null}
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs uppercase tracking-wide text-stone-400">
-                      Start
-                    </span>
+                    <span className="of-label">Start</span>
                     <input
                       required
                       type="datetime-local"
                       value={startTime}
                       onChange={(event) => setStartTime(event.target.value)}
-                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 outline-none ring-brand-500 focus:ring-2"
+                      className="of-field"
                     />
                   </label>
 
                   <label className="block space-y-1.5">
-                    <span className="text-xs uppercase tracking-wide text-stone-400">
-                      End
-                    </span>
+                    <span className="of-label">End</span>
                     <input
                       required
                       type="datetime-local"
                       value={endTime}
                       min={startTime}
                       onChange={(event) => setEndTime(event.target.value)}
-                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 outline-none ring-brand-500 focus:ring-2"
+                      className="of-field"
                     />
                   </label>
 
                   {submitError ? (
-                    <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                      {submitError}
-                    </p>
+                    <p className="of-alert-error">{submitError}</p>
                   ) : null}
                 </form>
               )}
             </div>
 
-            <div className="space-y-2 border-t border-stone-100 px-6 py-5">
+            <div className="of-material space-y-2 border-t border-[color:var(--of-separator)] px-6 py-5">
               {mode === 'details' ? (
                 <button
                   type="button"
@@ -322,7 +305,7 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
                     setSubmitError(null)
                     setMode('form')
                   }}
-                  className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-stone-300"
+                  className="of-btn-primary w-full py-3.5"
                 >
                   Zarezerwuj
                 </button>
@@ -337,7 +320,7 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
                       !tenantId ||
                       tenants.length === 0
                     }
-                    className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-stone-300"
+                    className="of-btn-primary w-full py-3.5"
                   >
                     {isSubmitting ? 'Saving...' : 'Potwierdź rezerwację'}
                   </button>
@@ -347,7 +330,7 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
                       setMode('details')
                       setSubmitError(null)
                     }}
-                    className="w-full rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                    className="of-btn-secondary w-full"
                   >
                     Anuluj
                   </button>
@@ -372,12 +355,12 @@ function DetailRow({
 }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-stone-400">{label}</p>
+      <p className="of-caption">{label}</p>
       <p
         className={
           emphasis
-            ? 'mt-1 text-lg font-semibold text-brand-700'
-            : 'mt-1 text-sm text-stone-800'
+            ? 'mt-1 text-lg font-semibold tracking-[-0.015em] text-brand-700'
+            : 'mt-1 text-[0.9375rem] text-ink-900'
         }
       >
         {value}

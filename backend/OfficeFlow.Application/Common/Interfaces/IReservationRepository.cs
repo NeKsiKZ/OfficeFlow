@@ -9,4 +9,6 @@ public interface IReservationRepository
     Task<IReadOnlyList<Reservation>> GetByTenantIdAsync(
         Guid tenantId,
         CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsForSpaceAsync(Guid spaceId, CancellationToken cancellationToken = default);
 }

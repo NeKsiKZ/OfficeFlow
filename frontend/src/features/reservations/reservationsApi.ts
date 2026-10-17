@@ -1,5 +1,9 @@
 import axiosClient from '../../api/axiosClient'
-import type { CreateReservationPayload, CreateReservationResult } from './types'
+import type {
+  CreateReservationPayload,
+  CreateReservationResult,
+  Reservation,
+} from './types'
 
 export async function createReservation(
   payload: CreateReservationPayload,
@@ -8,6 +12,16 @@ export async function createReservation(
     '/reservations',
     payload,
   )
+
+  return response.data
+}
+
+export async function fetchReservationsByTenant(
+  tenantId: string,
+): Promise<Reservation[]> {
+  const response = await axiosClient.get<Reservation[]>('/reservations', {
+    params: { tenantId },
+  })
 
   return response.data
 }

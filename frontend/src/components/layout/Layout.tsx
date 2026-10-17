@@ -1,39 +1,81 @@
-import { NavLink, Outlet } from 'react-router-dom'
-
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  [
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-    isActive
-      ? 'bg-brand-600 text-white'
-      : 'text-stone-700 hover:bg-brand-50 hover:text-brand-700',
-  ].join(' ')
+import type { ReactNode } from 'react'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { getAuthUser } from '../../features/auth/auth'
+import { clearToken } from '../../features/auth/tokenStorage'
 
 export function Layout() {
+  const navigate = useNavigate()
+  const user = getAuthUser()
+
+  function handleLogout() {
+    clearToken()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <div className="min-h-screen">
-      <header className="border-b border-stone-200/80 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4">
-          <div>
-            <p className="text-lg font-semibold tracking-tight text-brand-700">
+      <header className="of-toolbar">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5">
+          <div className="min-w-0">
+            <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-brand-700">
               OfficeFlow
             </p>
-            <p className="text-xs text-stone-500">Office space management</p>
+            <p className="of-caption truncate">
+              {user ? `${user.role} · ${user.email}` : 'Office space management'}
+            </p>
           </div>
 
-          <nav className="flex items-center gap-2" aria-label="Main navigation">
-            <NavLink to="/" end className={navLinkClass}>
+          <nav
+            className="flex flex-wrap items-center justify-end gap-1"
+            aria-label="Main navigation"
+          >
+            <NavItem to="/" end>
               Spaces
-            </NavLink>
-            <NavLink to="/reservations" className={navLinkClass}>
-              Reservations
-            </NavLink>
+            </NavItem>
+            <NavItem to="/reservations">Reservations</NavItem>
+            {user?.role === 'Tenant' ? (
+              <NavItem to="/my-reservations">My reservations</NavItem>
+            ) : null}
+            {user?.role === 'Manager' ? (
+              <>
+                <NavItem to="/manage-spaces">Manage spaces</NavItem>
+                <NavItem to="/dashboard">Dashboard</NavItem>
+              </>
+            ) : null}
+            <button type="button" onClick={handleLogout} className="of-btn-ghost">
+              Logout
+            </button>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
         <Outlet />
       </main>
     </div>
+  )
+}
+
+function NavItem({
+  to,
+  end,
+  children,
+}: {
+  to: string
+  end?: boolean
+  children: ReactNode
+}) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        ['of-nav-pill', isActive ? 'bg-brand-600 text-white shadow-sm' : ''].join(
+          ' ',
+        )
+      }
+    >
+      {children}
+    </NavLink>
   )
 }
