@@ -72,6 +72,13 @@ internal sealed class ReservationConfiguration : IEntityTypeConfiguration<Reserv
             .HasForeignKey(reservation => reservation.SpaceId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(reservation => reservation.AdditionalServices)
+            .WithMany(service => service.Reservations)
+            .UsingEntity(join => join.ToTable("ReservationAdditionalServices"));
+
+        builder.Navigation(reservation => reservation.AdditionalServices)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.HasIndex(reservation => reservation.TenantId);
         builder.HasIndex(reservation => reservation.SpaceId);
         builder.HasIndex(reservation => new { reservation.SpaceId, reservation.Status });

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OfficeFlow.Application.Common.Interfaces;
 using OfficeFlow.Application.Common.Options;
 using OfficeFlow.Infrastructure.Auth;
+using OfficeFlow.Infrastructure.Background;
 using OfficeFlow.Infrastructure.Persistence;
 using OfficeFlow.Infrastructure.Repositories;
 
@@ -27,8 +28,10 @@ public static class DependencyInjection
         services.AddScoped<ISpaceRepository, SpaceRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<IAdditionalServiceRepository, AdditionalServiceRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
+        services.AddHostedService<ReservationCompletionService>();
 
         return services;
     }

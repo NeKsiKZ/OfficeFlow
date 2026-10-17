@@ -25,3 +25,16 @@ export async function fetchReservationsByTenant(
 
   return response.data
 }
+
+export async function fetchAllReservations(): Promise<Reservation[]> {
+  const response = await axiosClient.get<Reservation[]>('/reservations')
+  return response.data
+}
+
+export async function confirmReservation(id: string): Promise<void> {
+  await axiosClient.post(`/reservations/${id}/confirm`)
+}
+
+export async function cancelReservation(id: string): Promise<void> {
+  await axiosClient.post(`/reservations/${id}/cancel`)
+}

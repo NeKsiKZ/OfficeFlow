@@ -7,9 +7,12 @@ namespace OfficeFlow.Domain.Entities;
 
 /// <summary>
 /// Reservation / lease request created by a tenant for a specific space and period.
+/// Lifecycle: Pending → Confirmed → Completed (auto) | Cancelled.
 /// </summary>
 public sealed class Reservation : Entity
 {
+    private readonly List<AdditionalService> _additionalServices = [];
+
     public Guid TenantId { get; private set; }
     public Guid SpaceId { get; private set; }
     public SpaceType SpaceType { get; private set; }
@@ -19,6 +22,9 @@ public sealed class Reservation : Entity
     public DateTime CreatedAtUtc { get; private set; }
     public string? Notes { get; private set; }
 
+    public IReadOnlyCollection<AdditionalService> AdditionalServices =>
+        _additionalServices.AsReadOnly();
+
     private Reservation()
     {
     }
@@ -27,8 +33,10 @@ public sealed class Reservation : Entity
         Tenant tenant,
         Space space,
         DateRange period,
-        string? notes = null)
-        : this(Guid.NewGuid(), tenant, space, period, notes)
+        IEnumerable<AdditionalService>? additionalServices = null,
+        string? notes = null,
+        DateTime? clockUtc = null)
+        : this(Guid.NewGuid(), tenant, space, period, additionalServices, notes, clockUtc)
     {
     }
 
@@ -37,7 +45,9 @@ public sealed class Reservation : Entity
         Tenant tenant,
         Space space,
         DateRange period,
-        string? notes = null)
+        IEnumerable<AdditionalService>? additionalServices = null,
+        string? notes = null,
+        DateTime? clockUtc = null)
         : base(id)
     {
         ArgumentNullException.ThrowIfNull(tenant);
@@ -54,14 +64,34 @@ public sealed class Reservation : Entity
             throw new DomainException("Inactive space cannot be reserved.");
         }
 
+        var now = clockUtc ?? DateTime.UtcNow;
+        space.EnsureValidReservationPeriod(period, now);
+
         TenantId = tenant.Id;
         SpaceId = space.Id;
         SpaceType = space.Type;
         Period = period;
-        TotalCost = space.CalculateCost(period);
         Status = ReservationStatus.Pending;
-        CreatedAtUtc = DateTime.UtcNow;
+        CreatedAtUtc = now.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(now, DateTimeKind.Utc)
+            : now.ToUniversalTime();
         Notes = NormalizeOptional(notes);
+
+        AssignAdditionalServices(additionalServices);
+        EnsureServicesApplyToSpace(space.Type);
+        TotalCost = CalculateTotalCost(space, period, _additionalServices);
+    }
+
+    private void EnsureServicesApplyToSpace(SpaceType spaceType)
+    {
+        foreach (var service in _additionalServices)
+        {
+            if (!service.AppliesTo(spaceType))
+            {
+                throw new DomainException(
+                    $"Service '{service.Name}' cannot be attached to a {spaceType} reservation.");
+            }
+        }
     }
 
     public void Confirm()
@@ -70,15 +100,9 @@ public sealed class Reservation : Entity
         Status = ReservationStatus.Confirmed;
     }
 
-    public void Reject()
-    {
-        EnsurePending();
-        Status = ReservationStatus.Rejected;
-    }
-
     public void Cancel()
     {
-        if (Status is ReservationStatus.Cancelled or ReservationStatus.Rejected or ReservationStatus.Completed)
+        if (Status is not (ReservationStatus.Pending or ReservationStatus.Confirmed))
         {
             throw new DomainException($"Reservation in status '{Status}' cannot be cancelled.");
         }
@@ -96,6 +120,33 @@ public sealed class Reservation : Entity
         Status = ReservationStatus.Completed;
     }
 
+    /// <summary>
+    /// Completes a confirmed reservation when its period has ended.
+    /// </summary>
+    /// <returns>True when the status changed to Completed.</returns>
+    public bool TryCompleteIfDue(DateTime utcNow)
+    {
+        if (Status != ReservationStatus.Confirmed)
+        {
+            return false;
+        }
+
+        var now = utcNow.Kind switch
+        {
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(utcNow, DateTimeKind.Utc),
+            DateTimeKind.Local => utcNow.ToUniversalTime(),
+            _ => utcNow
+        };
+
+        if (Period.EndUtc > now)
+        {
+            return false;
+        }
+
+        Complete();
+        return true;
+    }
+
     public void RecalculateCost(Space space)
     {
         ArgumentNullException.ThrowIfNull(space);
@@ -110,7 +161,47 @@ public sealed class Reservation : Entity
             throw new DomainException($"Cost cannot be recalculated for reservation in status '{Status}'.");
         }
 
-        TotalCost = space.CalculateCost(Period);
+        TotalCost = CalculateTotalCost(space, Period, _additionalServices);
+    }
+
+    public static Money CalculateTotalCost(
+        Space space,
+        DateRange period,
+        IEnumerable<AdditionalService> additionalServices)
+    {
+        ArgumentNullException.ThrowIfNull(space);
+        ArgumentNullException.ThrowIfNull(period);
+        ArgumentNullException.ThrowIfNull(additionalServices);
+
+        var total = space.CalculateCost(period);
+
+        // Room add-ons are monthly rates; hourly bookings charge the listed price once.
+        var serviceMultiplier = space.Type == SpaceType.Room
+            ? period.GetExactCalendarMonthCount()
+            : 1;
+
+        foreach (var service in additionalServices)
+        {
+            total = total.Add(service.Price.Multiply(serviceMultiplier));
+        }
+
+        return total;
+    }
+
+    private void AssignAdditionalServices(IEnumerable<AdditionalService>? additionalServices)
+    {
+        _additionalServices.Clear();
+
+        if (additionalServices is null)
+        {
+            return;
+        }
+
+        foreach (var service in additionalServices.DistinctBy(service => service.Id))
+        {
+            ArgumentNullException.ThrowIfNull(service);
+            _additionalServices.Add(service);
+        }
     }
 
     private void EnsurePending()

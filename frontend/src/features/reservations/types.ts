@@ -3,6 +3,7 @@ export interface CreateReservationPayload {
   tenantId: string
   startTime: string
   endTime: string
+  serviceIds?: string[]
 }
 
 export interface CreateReservationResult {
@@ -19,9 +20,8 @@ export interface CreateReservationResult {
 export const ReservationStatus = {
   Pending: 1,
   Confirmed: 2,
-  Rejected: 3,
-  Cancelled: 4,
-  Completed: 5,
+  Cancelled: 3,
+  Completed: 4,
 } as const
 
 export type ReservationStatus =
@@ -48,8 +48,6 @@ export function getReservationStatusLabel(status: ReservationStatus): string {
       return 'Pending'
     case ReservationStatus.Confirmed:
       return 'Confirmed'
-    case ReservationStatus.Rejected:
-      return 'Rejected'
     case ReservationStatus.Cancelled:
       return 'Cancelled'
     case ReservationStatus.Completed:
@@ -57,4 +55,15 @@ export function getReservationStatusLabel(status: ReservationStatus): string {
     default:
       return 'Unknown'
   }
+}
+
+export function canCancelReservation(status: ReservationStatus): boolean {
+  return (
+    status === ReservationStatus.Pending ||
+    status === ReservationStatus.Confirmed
+  )
+}
+
+export function canConfirmReservation(status: ReservationStatus): boolean {
+  return status === ReservationStatus.Pending
 }

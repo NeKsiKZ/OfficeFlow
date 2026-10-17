@@ -1,10 +1,11 @@
 import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { PageHeader } from '../../../components/ui/PageHeader'
 import { LoadingBlock, StatusBlock } from '../../../components/ui/StatusBlock'
 import { getAuthUser } from '../../auth/auth'
-import { fetchReservationsByTenant } from '../reservationsApi'
+import { cancelReservation, fetchReservationsByTenant } from '../reservationsApi'
 import {
+  canCancelReservation,
   getReservationStatusLabel,
   type Reservation,
 } from '../types'
@@ -16,52 +17,71 @@ function formatDateTime(value: string): string {
   }).format(new Date(value))
 }
 
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.message ?? error.message
+  }
+
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return fallback
+}
+
 export function MyReservations() {
   const user = getAuthUser()
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    let isActive = true
-
-    async function loadReservations() {
-      if (!user?.tenantId) {
-        setError('Tenant account is required to view reservation history.')
-        setIsLoading(false)
-        return
-      }
-
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const data = await fetchReservationsByTenant(user.tenantId)
-        if (isActive) {
-          setReservations(data)
-        }
-      } catch (err) {
-        if (isActive) {
-          if (axios.isAxiosError(err)) {
-            setError(err.response?.data?.message ?? err.message)
-          } else {
-            setError('Failed to load reservations.')
-          }
-          setReservations([])
-        }
-      } finally {
-        if (isActive) {
-          setIsLoading(false)
-        }
-      }
+  const loadReservations = useCallback(async () => {
+    if (!user?.tenantId) {
+      setError('Tenant account is required to view reservation history.')
+      setIsLoading(false)
+      return
     }
 
-    void loadReservations()
+    setIsLoading(true)
+    setError(null)
 
-    return () => {
-      isActive = false
+    try {
+      const data = await fetchReservationsByTenant(user.tenantId)
+      setReservations(data)
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Failed to load reservations.'))
+      setReservations([])
+    } finally {
+      setIsLoading(false)
     }
   }, [user?.tenantId])
+
+  useEffect(() => {
+    void loadReservations()
+  }, [loadReservations])
+
+  async function handleCancel(reservation: Reservation) {
+    const confirmed = window.confirm(
+      `Cancel reservation for "${reservation.spaceName}"?`,
+    )
+    if (!confirmed) {
+      return
+    }
+
+    setActionError(null)
+    setCancellingId(reservation.id)
+
+    try {
+      await cancelReservation(reservation.id)
+      await loadReservations()
+    } catch (err) {
+      setActionError(getApiErrorMessage(err, 'Could not cancel reservation.'))
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   return (
     <section className="space-y-6">
@@ -76,6 +96,10 @@ export function MyReservations() {
         <StatusBlock tone="error" title="Could not load reservations">
           {error}
         </StatusBlock>
+      ) : null}
+
+      {actionError ? (
+        <StatusBlock tone="error">{actionError}</StatusBlock>
       ) : null}
 
       {!isLoading && !error && reservations.length === 0 ? (
@@ -95,14 +119,12 @@ export function MyReservations() {
                   <th className="px-4 py-3 font-medium">To</th>
                   <th className="px-4 py-3 font-medium">Cost</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[color:var(--of-separator)]">
                 {reservations.map((reservation) => (
-                  <tr
-                    key={reservation.id}
-                    className="transition-colors duration-press hover:bg-ink-50/70"
-                  >
+                  <tr key={reservation.id} className="of-row">
                     <td className="px-4 py-3 font-medium tracking-[-0.01em] text-ink-900">
                       {reservation.spaceName}
                     </td>
@@ -119,6 +141,22 @@ export function MyReservations() {
                     <td className="px-4 py-3">
                       <StatusBadge status={reservation.status} />
                     </td>
+                    <td className="px-4 py-3 text-right">
+                      {canCancelReservation(reservation.status) ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleCancel(reservation)}
+                          disabled={cancellingId === reservation.id}
+                          className="of-btn-danger"
+                        >
+                          {cancellingId === reservation.id
+                            ? 'Cancelling...'
+                            : 'Cancel'}
+                        </button>
+                      ) : (
+                        <span className="of-caption">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -129,7 +167,7 @@ export function MyReservations() {
             {reservations.map((reservation) => (
               <article
                 key={reservation.id}
-                className="of-surface of-enter-delayed p-4"
+                className="of-surface of-enter-delayed space-y-3 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="font-semibold tracking-[-0.01em] text-ink-900">
@@ -137,13 +175,25 @@ export function MyReservations() {
                   </h2>
                   <StatusBadge status={reservation.status} />
                 </div>
-                <p className="of-body mt-3">
+                <p className="of-body">
                   {formatDateTime(reservation.startTimeUtc)} —{' '}
                   {formatDateTime(reservation.endTimeUtc)}
                 </p>
-                <p className="mt-2 text-base font-semibold tracking-[-0.01em] text-brand-700">
+                <p className="text-base font-semibold tracking-[-0.01em] text-brand-700">
                   {reservation.totalCostAmount.toFixed(2)} {reservation.currency}
                 </p>
+                {canCancelReservation(reservation.status) ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleCancel(reservation)}
+                    disabled={cancellingId === reservation.id}
+                    className="of-btn-danger w-full"
+                  >
+                    {cancellingId === reservation.id
+                      ? 'Cancelling...'
+                      : 'Cancel'}
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>
