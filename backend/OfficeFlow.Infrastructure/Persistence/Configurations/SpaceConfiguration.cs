@@ -30,6 +30,11 @@ internal sealed class SpaceConfiguration : IEntityTypeConfiguration<Space>
         builder.Property(space => space.IsActive)
             .IsRequired();
 
+        builder.Property(space => space.FloorNumber)
+            .IsRequired();
+
+        builder.HasIndex(space => space.FloorNumber);
+
         // Computed in domain; TPH discriminator stores the concrete type instead.
         builder.Ignore(space => space.Type);
 

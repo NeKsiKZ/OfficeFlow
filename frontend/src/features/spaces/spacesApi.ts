@@ -17,6 +17,7 @@ export interface CreateSpacePayload {
   capacity?: number | null
   spotNumber?: string | null
   currency?: string
+  floorNumber?: number
 }
 
 export interface CreateSpaceResult {

@@ -12,17 +12,20 @@ public sealed class CreateReservationCommandHandler
     private readonly ISpaceRepository _spaceRepository;
     private readonly ITenantRepository _tenantRepository;
     private readonly IReservationRepository _reservationRepository;
+    private readonly IAdditionalServiceRepository _serviceRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateReservationCommandHandler(
         ISpaceRepository spaceRepository,
         ITenantRepository tenantRepository,
         IReservationRepository reservationRepository,
+        IAdditionalServiceRepository serviceRepository,
         IUnitOfWork unitOfWork)
     {
         _spaceRepository = spaceRepository;
         _tenantRepository = tenantRepository;
         _reservationRepository = reservationRepository;
+        _serviceRepository = serviceRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -36,12 +39,22 @@ public sealed class CreateReservationCommandHandler
         var tenant = await _tenantRepository.GetByIdAsync(request.TenantId, cancellationToken)
             ?? throw new NotFoundException(nameof(Tenant), request.TenantId);
 
+        var serviceIds = request.ServiceIds?.Distinct().ToList() ?? [];
+        var services = serviceIds.Count == 0
+            ? []
+            : await _serviceRepository.GetByIdsAsync(serviceIds, cancellationToken);
+
+        if (services.Count != serviceIds.Count)
+        {
+            var foundIds = services.Select(service => service.Id).ToHashSet();
+            var missingId = serviceIds.First(id => !foundIds.Contains(id));
+            throw new NotFoundException(nameof(AdditionalService), missingId);
+        }
+
         var period = new DateRange(request.StartTime, request.EndTime);
 
-        // «include» Wyliczanie kosztu najmu — polymorphic pricing from Space (hourly / subscription).
-        var totalCost = space.CalculateCost(period);
-
-        var reservation = new Reservation(tenant, space, period);
+        // Space cost + selected add-on services (parking, media, storage, …).
+        var reservation = new Reservation(tenant, space, period, services);
 
         await _reservationRepository.AddAsync(reservation, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -52,8 +65,8 @@ public sealed class CreateReservationCommandHandler
             reservation.TenantId,
             reservation.Period.StartUtc,
             reservation.Period.EndUtc,
-            totalCost.Amount,
-            totalCost.Currency,
+            reservation.TotalCost.Amount,
+            reservation.TotalCost.Currency,
             reservation.Status);
     }
 }

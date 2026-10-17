@@ -9,6 +9,9 @@ namespace OfficeFlow.Domain.Entities;
 /// </summary>
 public sealed class Room : Space
 {
+    public const int MinSubscriptionMonths = 1;
+    public const int MaxSubscriptionMonths = 24;
+
     public Money MonthlySubscriptionRate { get; private set; } = null!;
     public decimal AreaSquareMeters { get; private set; }
     public int Capacity { get; private set; }
@@ -25,8 +28,17 @@ public sealed class Room : Space
         Money monthlySubscriptionRate,
         decimal areaSquareMeters,
         int capacity,
-        string? description = null)
-        : this(Guid.NewGuid(), name, code, monthlySubscriptionRate, areaSquareMeters, capacity, description)
+        string? description = null,
+        int floorNumber = 1)
+        : this(
+            Guid.NewGuid(),
+            name,
+            code,
+            monthlySubscriptionRate,
+            areaSquareMeters,
+            capacity,
+            description,
+            floorNumber)
     {
     }
 
@@ -37,8 +49,9 @@ public sealed class Room : Space
         Money monthlySubscriptionRate,
         decimal areaSquareMeters,
         int capacity,
-        string? description = null)
-        : base(id, name, code, description)
+        string? description = null,
+        int floorNumber = 1)
+        : base(id, name, code, description, floorNumber)
     {
         SetMonthlySubscriptionRate(monthlySubscriptionRate);
         SetArea(areaSquareMeters);
@@ -81,13 +94,33 @@ public sealed class Room : Space
     {
         ArgumentNullException.ThrowIfNull(period);
 
-        // Subscription billing: charge full months, rounding partial months up.
-        var months = (int)Math.Ceiling((double)period.DurationInDays / 30d);
-        if (months <= 0)
+        // Subscription billing: exact calendar months only (start + N months = end).
+        var months = period.GetExactCalendarMonthCount();
+        return MonthlySubscriptionRate.Multiply(months);
+    }
+
+    public override void EnsureValidReservationPeriod(DateRange period, DateTime utcNow)
+    {
+        ArgumentNullException.ThrowIfNull(period);
+
+        if (utcNow.Kind == DateTimeKind.Unspecified)
         {
-            months = 1;
+            utcNow = DateTime.SpecifyKind(utcNow, DateTimeKind.Utc);
         }
 
-        return MonthlySubscriptionRate.Multiply(months);
+        utcNow = utcNow.ToUniversalTime();
+
+        // Compare by UTC calendar date so a same-day start at midnight is allowed.
+        if (period.StartUtc.Date < utcNow.Date)
+        {
+            throw new DomainException("Room subscription start date cannot be in the past.");
+        }
+
+        var months = period.GetExactCalendarMonthCount();
+        if (months < MinSubscriptionMonths || months > MaxSubscriptionMonths)
+        {
+            throw new DomainException(
+                $"Room subscriptions must be between {MinSubscriptionMonths} and {MaxSubscriptionMonths} months.");
+        }
     }
 }

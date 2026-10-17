@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useState, type FormEvent } from 'react'
 import { PageHeader } from '../../../components/ui/PageHeader'
 import { LoadingBlock, StatusBlock } from '../../../components/ui/StatusBlock'
+import { CAMPUS_FLOORS, formatFloorLabel } from '../floors'
 import { useSpaces } from '../hooks/useSpaces'
 import { createSpace, deleteSpace } from '../spacesApi'
 import {
@@ -59,6 +60,7 @@ export function SpaceManager() {
   const [name, setName] = useState('')
   const [type, setType] = useState<SpaceTypeValue>(SpaceType.Desk)
   const [price, setPrice] = useState('')
+  const [floorNumber, setFloorNumber] = useState(1)
   const [formError, setFormError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -68,6 +70,7 @@ export function SpaceManager() {
     setName('')
     setType(SpaceType.Desk)
     setPrice('')
+    setFloorNumber(1)
     setFormError(null)
   }
 
@@ -104,6 +107,7 @@ export function SpaceManager() {
         capacity: type === SpaceType.Room ? 4 : null,
         spotNumber: type === SpaceType.ParkingSpace ? code : null,
         currency: 'PLN',
+        floorNumber,
       })
 
       resetForm()
@@ -179,9 +183,11 @@ export function SpaceManager() {
               <span className="of-label">Typ</span>
               <select
                 value={type}
-                onChange={(event) =>
-                  setType(Number(event.target.value) as SpaceTypeValue)
-                }
+                onChange={(event) => {
+                  const next = Number(event.target.value) as SpaceTypeValue
+                  setType(next)
+                  setFloorNumber(next === SpaceType.ParkingSpace ? 0 : 1)
+                }}
                 className="of-field"
               >
                 <option value={SpaceType.Desk}>Desk</option>
@@ -204,6 +210,21 @@ export function SpaceManager() {
                 placeholder="0.00"
                 required
               />
+            </label>
+
+            <label className="block space-y-1.5 sm:col-span-3">
+              <span className="of-label">Floor</span>
+              <select
+                value={floorNumber}
+                onChange={(event) => setFloorNumber(Number(event.target.value))}
+                className="of-field"
+              >
+                {CAMPUS_FLOORS.map((floor) => (
+                  <option key={floor} value={floor}>
+                    {formatFloorLabel(floor)}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 
@@ -267,7 +288,7 @@ export function SpaceManager() {
                 spaces.map((space) => (
                   <tr
                     key={space.id}
-                    className="text-ink-800 transition-colors duration-press hover:bg-ink-50/70"
+                    className="of-row text-ink-800"
                   >
                     <td className="px-4 py-3 font-medium tracking-[-0.01em]">
                       {space.name}

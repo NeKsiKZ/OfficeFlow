@@ -5,6 +5,7 @@ import { LoginPage } from './features/auth/components/LoginPage'
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute'
 import { MyReservations } from './features/reservations/components/MyReservations'
 import { ReservationsPage } from './features/reservations/components/ReservationsPage'
+import { ServiceManager } from './features/services/components/ServiceManager'
 import { SpaceManager } from './features/spaces/components/SpaceManager'
 import { SpacesPage } from './features/spaces/components/SpacesPage'
 
@@ -26,6 +27,7 @@ function App() {
             <Route element={<ProtectedRoute roles="Manager" />}>
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="manage-spaces" element={<SpaceManager />} />
+              <Route path="manage-services" element={<ServiceManager />} />
             </Route>
           </Route>
         </Route>

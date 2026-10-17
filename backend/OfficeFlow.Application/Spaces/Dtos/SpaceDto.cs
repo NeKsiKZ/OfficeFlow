@@ -17,4 +17,5 @@ public sealed record SpaceDto(
     string? SpotNumber,
     string? Floor,
     string? Zone,
-    string? Level);
+    string? Level,
+    int FloorNumber);

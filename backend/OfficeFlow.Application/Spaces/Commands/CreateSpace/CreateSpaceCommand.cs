@@ -16,4 +16,5 @@ public sealed record CreateSpaceCommand(
     string? Zone = null,
     string? Level = null,
     string? Description = null,
-    string Currency = "PLN") : IRequest<CreateSpaceResult>;
+    string Currency = "PLN",
+    int FloorNumber = 0) : IRequest<CreateSpaceResult>;

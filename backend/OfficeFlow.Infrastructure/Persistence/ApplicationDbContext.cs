@@ -16,6 +16,7 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<ParkingSpace> ParkingSpaces => Set<ParkingSpace>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
+    public DbSet<AdditionalService> AdditionalServices => Set<AdditionalService>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

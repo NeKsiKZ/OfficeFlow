@@ -1,4 +1,5 @@
 using FluentValidation;
+using OfficeFlow.Domain.Entities;
 using OfficeFlow.Domain.Enums;
 
 namespace OfficeFlow.Application.Spaces.Commands.CreateSpace;
@@ -11,6 +12,8 @@ public sealed class CreateSpaceCommandValidator : AbstractValidator<CreateSpaceC
         RuleFor(command => command.Code).NotEmpty().MaximumLength(50);
         RuleFor(command => command.Type).IsInEnum();
         RuleFor(command => command.Currency).NotEmpty().Length(3);
+        RuleFor(command => command.FloorNumber)
+            .InclusiveBetween(Space.MinFloorNumber, Space.MaxFloorNumber);
 
         When(command => command.Type is SpaceType.Desk or SpaceType.ParkingSpace, () =>
         {

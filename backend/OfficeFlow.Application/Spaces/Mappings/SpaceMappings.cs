@@ -23,7 +23,8 @@ public static class SpaceMappings
                 null,
                 desk.Floor,
                 desk.Zone,
-                null),
+                null,
+                desk.FloorNumber),
 
             Room room => new SpaceDto(
                 room.Id,
@@ -40,7 +41,8 @@ public static class SpaceMappings
                 null,
                 null,
                 null,
-                null),
+                null,
+                room.FloorNumber),
 
             ParkingSpace parking => new SpaceDto(
                 parking.Id,
@@ -57,7 +59,8 @@ public static class SpaceMappings
                 parking.SpotNumber,
                 null,
                 null,
-                parking.Level),
+                parking.Level,
+                parking.FloorNumber),
 
             _ => throw new InvalidOperationException($"Unsupported space type '{space.GetType().Name}'.")
         };

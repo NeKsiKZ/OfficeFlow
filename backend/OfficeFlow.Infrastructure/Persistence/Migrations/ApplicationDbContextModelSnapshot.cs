@@ -22,6 +22,47 @@ namespace OfficeFlow.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AdditionalServiceReservation", b =>
+                {
+                    b.Property<Guid>("AdditionalServicesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ReservationsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AdditionalServicesId", "ReservationsId");
+
+                    b.HasIndex("ReservationsId");
+
+                    b.ToTable("ReservationAdditionalServices", (string)null);
+                });
+
+            modelBuilder.Entity("OfficeFlow.Domain.Entities.AdditionalService", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int[]>("ApplicableSpaceTypes")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("AdditionalServices", (string)null);
+                });
+
             modelBuilder.Entity("OfficeFlow.Domain.Entities.Reservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -73,6 +114,9 @@ namespace OfficeFlow.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
+                    b.Property<int>("FloorNumber")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -88,6 +132,8 @@ namespace OfficeFlow.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("FloorNumber");
 
                     b.ToTable("Spaces", (string)null);
 
@@ -182,6 +228,51 @@ namespace OfficeFlow.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.HasDiscriminator().HasValue(2);
+                });
+
+            modelBuilder.Entity("AdditionalServiceReservation", b =>
+                {
+                    b.HasOne("OfficeFlow.Domain.Entities.AdditionalService", null)
+                        .WithMany()
+                        .HasForeignKey("AdditionalServicesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OfficeFlow.Domain.Entities.Reservation", null)
+                        .WithMany()
+                        .HasForeignKey("ReservationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OfficeFlow.Domain.Entities.AdditionalService", b =>
+                {
+                    b.OwnsOne("OfficeFlow.Domain.ValueObjects.Money", "Price", b1 =>
+                        {
+                            b1.Property<Guid>("AdditionalServiceId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("numeric(18,2)")
+                                .HasColumnName("PriceAmount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("PriceCurrency");
+
+                            b1.HasKey("AdditionalServiceId");
+
+                            b1.ToTable("AdditionalServices");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AdditionalServiceId");
+                        });
+
+                    b.Navigation("Price")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OfficeFlow.Domain.Entities.Reservation", b =>

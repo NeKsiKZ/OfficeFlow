@@ -9,6 +9,9 @@ namespace OfficeFlow.Domain.Entities;
 /// </summary>
 public sealed class ParkingSpace : Space
 {
+    public const int MinReservationHours = 1;
+    public const int MaxReservationHours = 12;
+
     public string SpotNumber { get; private set; } = null!;
     public Money HourlyRate { get; private set; } = null!;
     public string? Level { get; private set; }
@@ -25,8 +28,9 @@ public sealed class ParkingSpace : Space
         string spotNumber,
         Money hourlyRate,
         string? level = null,
-        string? description = null)
-        : this(Guid.NewGuid(), name, code, spotNumber, hourlyRate, level, description)
+        string? description = null,
+        int floorNumber = 0)
+        : this(Guid.NewGuid(), name, code, spotNumber, hourlyRate, level, description, floorNumber)
     {
     }
 
@@ -37,12 +41,13 @@ public sealed class ParkingSpace : Space
         string spotNumber,
         Money hourlyRate,
         string? level = null,
-        string? description = null)
-        : base(id, name, code, description)
+        string? description = null,
+        int floorNumber = 0)
+        : base(id, name, code, description, floorNumber)
     {
         SetSpotNumber(spotNumber);
         SetHourlyRate(hourlyRate);
-        Level = NormalizeOptional(level);
+        Level = NormalizeOptional(level) ?? (floorNumber == 0 ? "Outdoor" : floorNumber.ToString());
     }
 
     public void SetSpotNumber(string spotNumber)
@@ -80,6 +85,17 @@ public sealed class ParkingSpace : Space
         }
 
         return HourlyRate.Multiply(billableHours);
+    }
+
+    public override void EnsureValidReservationPeriod(DateRange period, DateTime utcNow)
+    {
+        ArgumentNullException.ThrowIfNull(period);
+        HourlyReservationPeriodRules.EnsureValid(
+            period,
+            utcNow,
+            MinReservationHours,
+            MaxReservationHours,
+            "Parking");
     }
 
     private static string? NormalizeOptional(string? value) =>

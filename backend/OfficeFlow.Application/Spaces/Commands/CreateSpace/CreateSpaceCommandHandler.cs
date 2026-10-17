@@ -42,7 +42,8 @@ public sealed class CreateSpaceCommandHandler
                 new Money(request.HourlyRate!.Value, request.Currency),
                 request.Floor,
                 request.Zone,
-                request.Description),
+                request.Description,
+                request.FloorNumber),
 
             SpaceType.Room => new Room(
                 request.Name,
@@ -50,7 +51,8 @@ public sealed class CreateSpaceCommandHandler
                 new Money(request.MonthlySubscriptionRate!.Value, request.Currency),
                 request.AreaSquareMeters!.Value,
                 request.Capacity!.Value,
-                request.Description),
+                request.Description,
+                request.FloorNumber),
 
             SpaceType.ParkingSpace => new ParkingSpace(
                 request.Name,
@@ -58,7 +60,8 @@ public sealed class CreateSpaceCommandHandler
                 request.SpotNumber!,
                 new Money(request.HourlyRate!.Value, request.Currency),
                 request.Level,
-                request.Description),
+                request.Description,
+                request.FloorNumber),
 
             _ => throw new DomainException($"Unsupported space type '{request.Type}'.")
         };

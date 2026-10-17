@@ -9,6 +9,9 @@ namespace OfficeFlow.Domain.Entities;
 /// </summary>
 public sealed class Desk : Space
 {
+    public const int MinReservationHours = 1;
+    public const int MaxReservationHours = 12;
+
     public Money HourlyRate { get; private set; } = null!;
     public string? Floor { get; private set; }
     public string? Zone { get; private set; }
@@ -25,8 +28,9 @@ public sealed class Desk : Space
         Money hourlyRate,
         string? floor = null,
         string? zone = null,
-        string? description = null)
-        : this(Guid.NewGuid(), name, code, hourlyRate, floor, zone, description)
+        string? description = null,
+        int floorNumber = 1)
+        : this(Guid.NewGuid(), name, code, hourlyRate, floor, zone, description, floorNumber)
     {
     }
 
@@ -37,11 +41,12 @@ public sealed class Desk : Space
         Money hourlyRate,
         string? floor = null,
         string? zone = null,
-        string? description = null)
-        : base(id, name, code, description)
+        string? description = null,
+        int floorNumber = 1)
+        : base(id, name, code, description, floorNumber)
     {
         SetHourlyRate(hourlyRate);
-        Floor = NormalizeOptional(floor);
+        Floor = NormalizeOptional(floor) ?? floorNumber.ToString();
         Zone = NormalizeOptional(zone);
     }
 
@@ -74,6 +79,17 @@ public sealed class Desk : Space
         }
 
         return HourlyRate.Multiply(billableHours);
+    }
+
+    public override void EnsureValidReservationPeriod(DateRange period, DateTime utcNow)
+    {
+        ArgumentNullException.ThrowIfNull(period);
+        HourlyReservationPeriodRules.EnsureValid(
+            period,
+            utcNow,
+            MinReservationHours,
+            MaxReservationHours,
+            "Desk");
     }
 
     private static string? NormalizeOptional(string? value) =>

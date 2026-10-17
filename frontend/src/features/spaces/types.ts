@@ -22,6 +22,8 @@ export interface Space {
   floor: string | null
   zone: string | null
   level: string | null
+  /** Campus map floor index (−2 … 2 today; manager layout editor later). */
+  floorNumber: number
 }
 
 export function getSpaceTypeLabel(type: SpaceType): string {

@@ -70,11 +70,15 @@ public sealed class SpacesController : ControllerBase
             request.Zone,
             request.Level,
             request.Description,
-            request.Currency ?? "PLN");
+            request.Currency ?? "PLN",
+            request.FloorNumber ?? DefaultFloorNumber(request.Type));
 
         var result = await _mediator.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = result.SpaceId }, result);
     }
+
+    private static int DefaultFloorNumber(SpaceType type) =>
+        type == SpaceType.ParkingSpace ? 0 : 1;
 
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = Roles.Manager)]
@@ -101,4 +105,5 @@ public sealed record CreateSpaceRequest(
     string? Zone = null,
     string? Level = null,
     string? Description = null,
-    string? Currency = "PLN");
+    string? Currency = "PLN",
+    int? FloorNumber = null);
