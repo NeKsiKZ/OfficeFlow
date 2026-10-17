@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { getAuthUser } from '../../features/auth/auth'
 import { clearToken } from '../../features/auth/tokenStorage'
+import { ThemeToggle } from '../../theme/ThemeToggle'
 
 export function Layout() {
   const navigate = useNavigate()
@@ -13,7 +14,7 @@ export function Layout() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-app">
       <header className="of-toolbar">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5">
           <div className="min-w-0">
@@ -39,9 +40,11 @@ export function Layout() {
             {user?.role === 'Manager' ? (
               <>
                 <NavItem to="/manage-spaces">Manage spaces</NavItem>
+                <NavItem to="/manage-services">Manage services</NavItem>
                 <NavItem to="/dashboard">Dashboard</NavItem>
               </>
             ) : null}
+            <ThemeToggle />
             <button type="button" onClick={handleLogout} className="of-btn-ghost">
               Logout
             </button>

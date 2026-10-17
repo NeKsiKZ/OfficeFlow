@@ -11,7 +11,8 @@ OfficeFlow/
 │   ├── OfficeFlow.Domain/
 │   ├── OfficeFlow.Application/
 │   ├── OfficeFlow.Infrastructure/
-│   └── OfficeFlow.Api/
+│   ├── OfficeFlow.Api/
+│   └── OfficeFlow.Tests/    # Testy jednostkowe (xUnit)
 ├── frontend/                # Aplikacja React (Vite + TypeScript)
 ├── docker-compose.yml       # PostgreSQL
 └── README.md
@@ -81,6 +82,22 @@ Kompilacja całej solucji:
 dotnet build OfficeFlow.sln
 ```
 
+### Testy jednostkowe
+
+Projekt `OfficeFlow.Tests` (xUnit + Moq + FluentAssertions) weryfikuje kluczową logikę Application, m.in. tworzenie rezerwacji i wyliczanie kosztu.
+
+Z katalogu `backend`:
+
+```bash
+dotnet test
+```
+
+Albo tylko projekt testowy:
+
+```bash
+dotnet test OfficeFlow.Tests/OfficeFlow.Tests.csproj
+```
+
 ## 3. Uruchomienie frontendu
 
 ```bash
@@ -99,6 +116,7 @@ Aplikacja Vite będzie dostępna pod adresem wyświetlonym w terminalu (zwykle `
 | `OfficeFlow.Application`   | Przypadki użycia, DTO, interfejsy         |
 | `OfficeFlow.Infrastructure`| EF Core, PostgreSQL, implementacje        |
 | `OfficeFlow.Api`           | Kontrolery / Minimal API, konfiguracja DI |
+| `OfficeFlow.Tests`         | Testy jednostkowe (xUnit)                 |
 
 Referencje projektów:
 

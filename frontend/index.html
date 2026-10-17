@@ -3,8 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#f2f2f7" />
+    <meta name="color-scheme" content="light dark" />
     <title>OfficeFlow</title>
+    <script>
+      (() => {
+        try {
+          const key = 'officeflow-theme'
+          const stored = localStorage.getItem(key)
+          const preference =
+            stored === 'light' || stored === 'dark' || stored === 'system'
+              ? stored
+              : 'system'
+          const dark =
+            preference === 'dark' ||
+            (preference === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.classList.toggle('dark', dark)
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+          const themeMeta = document.querySelector('meta[name="theme-color"]')
+          if (themeMeta) {
+            themeMeta.setAttribute('content', dark ? '#0e1210' : '#f2f2f7')
+          }
+        } catch (_) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

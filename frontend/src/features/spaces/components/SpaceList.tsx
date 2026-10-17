@@ -38,7 +38,7 @@ export function SpaceList() {
       {spaces.map((space) => (
         <article
           key={space.id}
-          className="of-surface of-enter-delayed flex flex-col gap-3 p-5 transition-[transform,box-shadow] duration-press hover:shadow-md active:scale-[0.99]"
+          className="of-surface of-surface-pressable of-enter-delayed flex flex-col gap-3 p-5"
         >
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-lg font-semibold tracking-[-0.015em] text-ink-900">

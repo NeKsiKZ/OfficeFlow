@@ -1,27 +1,32 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       colors: {
         brand: {
-          50: '#eef6f3',
-          100: '#d5ebe3',
-          200: '#aed6c6',
-          500: '#2f6f5e',
-          600: '#245a4c',
-          700: '#1c463b',
-          800: '#15352e',
+          50: 'rgb(var(--of-brand-50) / <alpha-value>)',
+          100: 'rgb(var(--of-brand-100) / <alpha-value>)',
+          200: 'rgb(var(--of-brand-200) / <alpha-value>)',
+          500: 'rgb(var(--of-brand-500) / <alpha-value>)',
+          600: 'rgb(var(--of-brand-600) / <alpha-value>)',
+          700: 'rgb(var(--of-brand-700) / <alpha-value>)',
+          800: 'rgb(var(--of-brand-800) / <alpha-value>)',
         },
         ink: {
-          50: '#f7f7f8',
-          100: '#eeeef0',
-          200: '#dcdcde',
-          400: '#8e8e93',
-          500: '#636366',
-          600: '#48484a',
-          700: '#3a3a3c',
-          900: '#1c1c1e',
+          50: 'rgb(var(--of-ink-50) / <alpha-value>)',
+          100: 'rgb(var(--of-ink-100) / <alpha-value>)',
+          200: 'rgb(var(--of-ink-200) / <alpha-value>)',
+          400: 'rgb(var(--of-ink-400) / <alpha-value>)',
+          500: 'rgb(var(--of-ink-500) / <alpha-value>)',
+          600: 'rgb(var(--of-ink-600) / <alpha-value>)',
+          700: 'rgb(var(--of-ink-700) / <alpha-value>)',
+          800: 'rgb(var(--of-ink-800) / <alpha-value>)',
+          900: 'rgb(var(--of-ink-900) / <alpha-value>)',
         },
       },
       fontFamily: {
@@ -39,18 +44,18 @@ export default {
         ],
       },
       transitionTimingFunction: {
-        spring: 'cubic-bezier(0.32, 0.72, 0, 1)',
-        'spring-bounce': 'cubic-bezier(0.34, 1.2, 0.64, 1)',
+        'ease-out-strong': 'cubic-bezier(0.23, 1, 0.32, 1)',
+        'ease-in-out-strong': 'cubic-bezier(0.77, 0, 0.175, 1)',
+        drawer: 'cubic-bezier(0.32, 0.72, 0, 1)',
       },
       transitionDuration: {
-        press: '100ms',
-        spring: '400ms',
-        sheet: '380ms',
+        press: '120ms',
+        ui: '200ms',
+        sheet: '280ms',
       },
       boxShadow: {
-        material:
-          '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
-        sheet: '0 0 0 0.5px rgba(0,0,0,0.06), 0 24px 80px rgba(0,0,0,0.18)',
+        material: 'var(--of-shadow-material)',
+        sheet: 'var(--of-shadow-sheet)',
       },
       borderRadius: {
         control: '12px',

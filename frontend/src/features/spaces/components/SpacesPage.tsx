@@ -14,7 +14,7 @@ export function SpacesPage() {
     <section className="space-y-6">
       <PageHeader
         title="Office map"
-        description="Filter available spaces, then press a desk, room, or parking spot to view details and reserve."
+        description="Switch floors (−2…2), filter spaces, then press a desk, room, or parking spot to reserve."
       />
 
       <div className="of-enter-delayed">

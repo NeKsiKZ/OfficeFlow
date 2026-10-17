@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { ThemeToggle } from '../../../theme/ThemeToggle'
 import { login } from '../authApi'
 import { getAuthUser } from '../auth'
 import { setToken } from '../tokenStorage'
@@ -52,7 +53,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
+    <div className="relative flex min-h-hero items-center justify-center overflow-hidden px-4 py-12 pt-[max(3rem,env(safe-area-inset-top))] pb-[max(3rem,env(safe-area-inset-bottom))]">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-70"
@@ -61,6 +62,10 @@ export function LoginPage() {
             'radial-gradient(circle at 20% 20%, rgba(47,111,94,0.18), transparent 42%), radial-gradient(circle at 80% 10%, rgba(90,120,160,0.14), transparent 40%)',
         }}
       />
+
+      <div className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] z-10">
+        <ThemeToggle />
+      </div>
 
       <div className="of-material-thick of-enter relative w-full max-w-[420px] rounded-[28px] p-8 sm:p-10">
         <div className="mb-8 space-y-3 text-center">

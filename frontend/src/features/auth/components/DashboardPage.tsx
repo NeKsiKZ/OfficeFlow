@@ -24,6 +24,18 @@ export function DashboardPage() {
             </Link>
             <span className="text-ink-400"> — add or remove office inventory</span>
           </li>
+          <li>
+            <Link
+              to="/manage-services"
+              className="font-medium text-brand-700 underline-offset-4 hover:underline"
+            >
+              Manage services
+            </Link>
+            <span className="text-ink-400">
+              {' '}
+              — parking, media, lockers and other add-ons
+            </span>
+          </li>
           <li className="text-ink-500">
             Review revenue reports via GET /api/reports/revenue
           </li>

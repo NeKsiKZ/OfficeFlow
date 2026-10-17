@@ -1,3 +1,4 @@
+import type { CampusFloor } from './floors'
 import { SpaceType, type Space } from './types'
 
 export interface MapPlacement {
@@ -8,113 +9,152 @@ export interface MapPlacement {
   heightPercent: number
 }
 
-/**
- * Derives a schematic floor-plan layout from API data
- * (no persisted coordinates yet): rooms on edges, desks in the open center, parking at the bottom.
- */
-export function buildMapPlacements(spaces: Space[]): MapPlacement[] {
-  const rooms = spaces.filter((space) => space.type === SpaceType.Room)
-  const desks = spaces.filter((space) => space.type === SpaceType.Desk)
-  const parking = spaces.filter((space) => space.type === SpaceType.ParkingSpace)
-
-  return [
-    ...placeRooms(rooms),
-    ...placeDesks(desks),
-    ...placeParking(parking),
-  ]
+export interface MapZone {
+  id: string
+  label: string
+  leftPercent: number
+  topPercent: number
+  widthPercent: number
+  heightPercent: number
+  kind: 'building' | 'parking'
 }
 
-function placeRooms(rooms: Space[]): MapPlacement[] {
-  if (rooms.length === 0) {
-    return []
+/** Floor 1 — indoor campus: cabinets + open office. */
+const FLOOR_1_ZONES: MapZone[] = [
+  {
+    id: 'building-cabinets',
+    label: 'Cabinets',
+    leftPercent: 3,
+    topPercent: 8,
+    widthPercent: 40,
+    heightPercent: 78,
+    kind: 'building',
+  },
+  {
+    id: 'building-open-office',
+    label: 'Open office',
+    leftPercent: 47,
+    topPercent: 8,
+    widthPercent: 50,
+    heightPercent: 78,
+    kind: 'building',
+  },
+]
+
+/** Floor 0 — outdoor / ground parking. */
+const FLOOR_0_ZONES: MapZone[] = [
+  {
+    id: 'outdoor-parking',
+    label: 'Outdoor parking',
+    leftPercent: 8,
+    topPercent: 28,
+    widthPercent: 84,
+    heightPercent: 44,
+    kind: 'parking',
+  },
+]
+
+export function getCampusZonesForFloor(floor: CampusFloor): MapZone[] {
+  if (floor === 1) {
+    return FLOOR_1_ZONES
   }
 
-  return rooms.map((space, index) => {
-    const side = index % 4
-    const slot = Math.floor(index / 4)
-    const slotOffset = 12 + slot * 18
+  if (floor === 0) {
+    return FLOOR_0_ZONES
+  }
 
-    switch (side) {
-      case 0: // top edge
-        return {
-          space,
-          leftPercent: Math.min(slotOffset, 70),
-          topPercent: 4,
-          widthPercent: 16,
-          heightPercent: 14,
-        }
-      case 1: // right edge
-        return {
-          space,
-          leftPercent: 80,
-          topPercent: Math.min(slotOffset, 58),
-          widthPercent: 16,
-          heightPercent: 14,
-        }
-      case 2: // bottom edge (above parking strip)
-        return {
-          space,
-          leftPercent: Math.min(slotOffset, 70),
-          topPercent: 62,
-          widthPercent: 16,
-          heightPercent: 12,
-        }
-      default: // left edge
-        return {
-          space,
-          leftPercent: 4,
-          topPercent: Math.min(slotOffset, 58),
-          widthPercent: 16,
-          heightPercent: 14,
-        }
-    }
-  })
+  // Empty floors reserved for future manager layout customization.
+  return []
 }
 
-function placeDesks(desks: Space[]): MapPlacement[] {
-  if (desks.length === 0) {
-    return []
+export function buildMapPlacements(
+  spaces: Space[],
+  floor: CampusFloor,
+): MapPlacement[] {
+  const onFloor = spaces.filter((space) => space.floorNumber === floor)
+
+  if (floor === 1) {
+    const rooms = onFloor.filter((space) => space.type === SpaceType.Room)
+    const desks = onFloor.filter((space) => space.type === SpaceType.Desk)
+    return [
+      ...placeRoomsInCabinetBuilding(rooms),
+      ...placeDesksInOpenOffice(desks),
+    ]
   }
 
-  const columns = Math.min(4, Math.max(2, Math.ceil(Math.sqrt(desks.length))))
-  const cellWidth = 10
-  const cellHeight = 9
-  const gapX = 3
-  const gapY = 3
-  const gridWidth = columns * cellWidth + (columns - 1) * gapX
-  const rows = Math.ceil(desks.length / columns)
-  const gridHeight = rows * cellHeight + (rows - 1) * gapY
-  const startLeft = 50 - gridWidth / 2
-  const startTop = 28 - gridHeight / 2
+  if (floor === 0) {
+    const parking = onFloor.filter(
+      (space) => space.type === SpaceType.ParkingSpace,
+    )
+    return placeOutdoorParking(parking)
+  }
 
-  return desks.map((space, index) => {
+  return []
+}
+
+function placeRoomsInCabinetBuilding(rooms: Space[]): MapPlacement[] {
+  const building = FLOOR_1_ZONES[0]
+  const padX = 3
+  const padY = 10
+  const gap = 2.5
+  const innerLeft = building.leftPercent + padX
+  const innerTop = building.topPercent + padY
+  const innerWidth = building.widthPercent - padX * 2
+  const innerHeight = building.heightPercent - padY - 4
+  const slotWidth = (innerWidth - gap) / 2
+
+  return rooms.slice(0, 2).map((space, index) => ({
+    space,
+    leftPercent: innerLeft + index * (slotWidth + gap),
+    topPercent: innerTop,
+    widthPercent: slotWidth,
+    heightPercent: innerHeight,
+  }))
+}
+
+function placeDesksInOpenOffice(desks: Space[]): MapPlacement[] {
+  const building = FLOOR_1_ZONES[1]
+  const padX = 4
+  const padY = 11
+  const gapX = 2
+  const gapY = 2.5
+  const columns = 3
+  const cellWidth =
+    (building.widthPercent - padX * 2 - gapX * (columns - 1)) / columns
+  const cellHeight = 18
+  const startLeft = building.leftPercent + padX
+  const startTop = building.topPercent + padY
+
+  return desks.slice(0, 5).map((space, index) => {
     const col = index % columns
     const row = Math.floor(index / columns)
 
     return {
       space,
       leftPercent: startLeft + col * (cellWidth + gapX),
-      topPercent: Math.max(22, startTop + row * (cellHeight + gapY)),
+      topPercent: startTop + row * (cellHeight + gapY),
       widthPercent: cellWidth,
       heightPercent: cellHeight,
     }
   })
 }
 
-function placeParking(parking: Space[]): MapPlacement[] {
-  if (parking.length === 0) {
-    return []
-  }
+function placeOutdoorParking(parking: Space[]): MapPlacement[] {
+  const zone = FLOOR_0_ZONES[0]
+  const padX = 3
+  const padY = 9
+  const gap = 2
+  const count = Math.min(4, Math.max(1, parking.length))
+  const slotWidth = (zone.widthPercent - padX * 2 - gap * (count - 1)) / count
+  const startLeft = zone.leftPercent + padX
+  const top = zone.topPercent + padY
+  const height = zone.heightPercent - padY - 4
 
-  const width = Math.min(12, 80 / parking.length)
-  const totalWidth = parking.length * width
-  const startLeft = 50 - totalWidth / 2
-
-  return parking.map((space, index) => ({
+  return parking.slice(0, 4).map((space, index) => ({
     space,
-    leftPercent: startLeft + index * width,
-    topPercent: 80,
-    widthPercent: width - 1,
-    heightPercent: 12,
+    leftPercent: startLeft + index * (slotWidth + gap),
+    topPercent: top,
+    widthPercent: slotWidth,
+    heightPercent: height,
   }))
 }
