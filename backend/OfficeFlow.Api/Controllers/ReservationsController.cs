@@ -1,7 +1,10 @@
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OfficeFlow.Application.Common.Exceptions;
 using OfficeFlow.Application.Reservations.Commands.CreateReservation;
+using OfficeFlow.Application.Reservations.Dtos;
+using OfficeFlow.Application.Reservations.Queries.GetReservationsByTenant;
 
 namespace OfficeFlow.Api.Controllers;
 
@@ -14,6 +17,27 @@ public sealed class ReservationsController : ControllerBase
     public ReservationsController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<ReservationDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IReadOnlyList<ReservationDto>>> GetByTenant(
+        [FromQuery] Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _mediator.Send(
+                new GetReservationsByTenantQuery(tenantId),
+                cancellationToken);
+
+            return Ok(result);
+        }
+        catch (ValidationException exception)
+        {
+            return BadRequest(new { errors = exception.Errors.Select(error => error.ErrorMessage) });
+        }
     }
 
     [HttpPost]
@@ -33,14 +57,17 @@ public sealed class ReservationsController : ControllerBase
         try
         {
             var result = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(
-                nameof(Create),
-                new { id = result.ReservationId },
+            return Created(
+                $"/api/reservations?tenantId={result.TenantId}",
                 result);
         }
         catch (NotFoundException exception)
         {
             return NotFound(new { message = exception.Message });
+        }
+        catch (ValidationException exception)
+        {
+            return BadRequest(new { errors = exception.Errors.Select(error => error.ErrorMessage) });
         }
     }
 }

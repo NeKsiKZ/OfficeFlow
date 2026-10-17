@@ -1,7 +1,11 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OfficeFlow.Application.Common.Exceptions;
 using OfficeFlow.Application.Spaces.Commands.CreateSpace;
+using OfficeFlow.Application.Spaces.Dtos;
+using OfficeFlow.Application.Spaces.Queries.GetSpaceById;
+using OfficeFlow.Application.Spaces.Queries.GetSpaces;
 using OfficeFlow.Domain.Enums;
 using OfficeFlow.Domain.Exceptions;
 
@@ -16,6 +20,34 @@ public sealed class SpacesController : ControllerBase
     public SpacesController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<SpaceDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SpaceDto>>> GetAll(
+        [FromQuery] SpaceType? type,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetSpacesQuery(type), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(SpaceDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<SpaceDto>> GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetSpaceByIdQuery(id), cancellationToken);
+            return Ok(result);
+        }
+        catch (NotFoundException exception)
+        {
+            return NotFound(new { message = exception.Message });
+        }
     }
 
     [HttpPost]
@@ -43,7 +75,7 @@ public sealed class SpacesController : ControllerBase
         try
         {
             var result = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(Create), new { id = result.SpaceId }, result);
+            return CreatedAtAction(nameof(GetById), new { id = result.SpaceId }, result);
         }
         catch (ValidationException exception)
         {

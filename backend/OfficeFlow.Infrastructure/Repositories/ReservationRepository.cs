@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using OfficeFlow.Application.Common.Interfaces;
 using OfficeFlow.Domain.Entities;
 using OfficeFlow.Infrastructure.Persistence;
@@ -16,5 +17,16 @@ public sealed class ReservationRepository : IReservationRepository
     public async Task AddAsync(Reservation reservation, CancellationToken cancellationToken = default)
     {
         await _dbContext.Reservations.AddAsync(reservation, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Reservation>> GetByTenantIdAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Reservations
+            .AsNoTracking()
+            .Where(reservation => reservation.TenantId == tenantId)
+            .OrderByDescending(reservation => reservation.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
     }
 }

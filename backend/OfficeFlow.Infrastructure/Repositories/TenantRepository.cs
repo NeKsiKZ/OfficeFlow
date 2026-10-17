@@ -17,6 +17,7 @@ public sealed class TenantRepository : ITenantRepository
     public async Task<Tenant?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Tenants
+            .AsNoTracking()
             .FirstOrDefaultAsync(tenant => tenant.Id == id, cancellationToken);
     }
 
