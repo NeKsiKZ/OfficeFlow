@@ -67,7 +67,9 @@ export function DashboardPage() {
                 onClick={() => setPreset(value)}
                 className={[
                   'of-nav-pill px-3 py-1.5 text-[0.8125rem]',
-                  preset === value ? 'bg-brand-600 text-white shadow-sm' : '',
+                  preset === value
+                    ? 'bg-brand-600 text-[color:var(--of-on-brand)] shadow-sm'
+                    : '',
                 ].join(' ')}
               >
                 {label}
@@ -122,7 +124,7 @@ function StatsContent({ stats }: { stats: ManagerStats }) {
         >
           <p className="of-caption">Awaiting confirmation</p>
           <p className="of-title mt-2 tabular-nums">{counts.pending}</p>
-          <p className="of-caption mt-2 text-brand-700">
+          <p className="of-caption mt-2 text-ink-600">
             {counts.pending === 0
               ? 'No pending requests'
               : 'Review in Reservations →'}

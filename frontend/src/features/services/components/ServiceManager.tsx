@@ -229,7 +229,7 @@ export function ServiceManager() {
                     className={[
                       'inline-flex cursor-pointer items-center gap-2 rounded-pill px-3.5 py-2 text-[0.875rem] font-medium',
                       checked
-                        ? 'bg-brand-600 text-white'
+                        ? 'bg-brand-600 text-[color:var(--of-on-brand)]'
                         : 'bg-[color:var(--of-fill)] text-ink-700',
                     ].join(' ')}
                   >

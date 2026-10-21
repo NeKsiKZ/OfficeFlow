@@ -18,7 +18,7 @@ export function Layout() {
       <header className="of-toolbar">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5">
           <div className="min-w-0">
-            <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-brand-700">
+            <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
               OfficeFlow
             </p>
             <p className="of-caption truncate">
@@ -73,9 +73,11 @@ function NavItem({
       to={to}
       end={end}
       className={({ isActive }) =>
-        ['of-nav-pill', isActive ? 'bg-brand-600 text-white shadow-sm' : ''].join(
-          ' ',
-        )
+        [
+          'of-nav-pill',
+          isActive ? 'bg-brand-600 shadow-sm' : '',
+          isActive ? 'text-[color:var(--of-on-brand)]' : '',
+        ].join(' ')
       }
     >
       {children}

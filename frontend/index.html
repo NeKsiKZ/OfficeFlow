@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
-    <meta name="theme-color" content="#f2f2f7" />
+    <meta name="theme-color" content="#050607" />
     <meta name="color-scheme" content="light dark" />
     <title>OfficeFlow</title>
     <script>
@@ -18,7 +18,7 @@
           const preference =
             stored === 'light' || stored === 'dark' || stored === 'system'
               ? stored
-              : 'system'
+              : 'dark'
           const dark =
             preference === 'dark' ||
             (preference === 'system' &&
@@ -27,7 +27,7 @@
           document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
           const themeMeta = document.querySelector('meta[name="theme-color"]')
           if (themeMeta) {
-            themeMeta.setAttribute('content', dark ? '#0e1210' : '#f2f2f7')
+            themeMeta.setAttribute('content', dark ? '#050607' : '#f3f4f3')
           }
         } catch (_) {}
       })()

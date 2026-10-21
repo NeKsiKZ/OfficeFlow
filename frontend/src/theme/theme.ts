@@ -13,7 +13,7 @@ export function getStoredThemePreference(): ThemePreference {
     // ignore private mode / blocked storage
   }
 
-  return 'system'
+  return 'dark'
 }
 
 export function getSystemTheme(): ResolvedTheme {
@@ -35,7 +35,7 @@ export function applyResolvedTheme(resolved: ResolvedTheme): void {
   root.classList.toggle('dark', resolved === 'dark')
   root.style.colorScheme = resolved
 
-  const themeColor = resolved === 'dark' ? '#0e1210' : '#f2f2f7'
+  const themeColor = resolved === 'dark' ? '#050607' : '#f3f4f3'
   document
     .querySelectorAll('meta[name="theme-color"]')
     .forEach((meta) => meta.setAttribute('content', themeColor))
