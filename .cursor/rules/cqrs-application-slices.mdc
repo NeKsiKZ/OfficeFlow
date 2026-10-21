@@ -1,0 +1,45 @@
+---
+description: CQRS application slice layout for MediatR use cases
+globs: backend/OfficeFlow.Application/**/*.cs
+alwaysApply: false
+---
+
+# CQRS Application Slices
+
+New Application use cases follow the existing vertical-slice layout. One folder = one command or query.
+
+## Folder layout
+
+```
+{Feature}/
+  Commands/{Name}/
+    {Name}Command.cs
+    {Name}CommandHandler.cs
+    {Name}CommandValidator.cs   # FluentValidation when input needs rules
+    {Name}Result.cs             # optional result type
+  Queries/{Name}/
+    {Name}Query.cs
+    {Name}QueryHandler.cs
+    {Name}QueryValidator.cs     # optional
+  Dtos/
+  Mappings/
+```
+
+Examples: `Reservations/Commands/CreateReservation/`, `Reports/Queries/GetManagerStats/`.
+
+## Rules
+
+- Command/Query is a `sealed record` implementing `IRequest<T>` (MediatR).
+- Handler is a `sealed class` with constructor-injected Application interfaces only (`I*Repository`, `IUnitOfWork`, etc.).
+- **No EF Core, DbContext, or Infrastructure types** in Application.
+- Put shared contracts in `Common/Interfaces/`; feature DTOs in `{Feature}/Dtos/`; mapping extensions in `{Feature}/Mappings/`.
+- Controllers stay thin: validate auth/HTTP, then `_mediator.Send(...)`.
+- Pure calculators (e.g. `ManagerStatsCalculator`) may live next to the feature, outside the slice folder, when reused/tested independently.
+
+```csharp
+// ✅ GOOD
+public sealed record GetManagerStatsQuery(DateTime? FromUtc, DateTime? ToUtc)
+    : IRequest<ManagerStatsDto>;
+
+// ❌ BAD — EF / DbContext in handler, or dumping logic into the controller
+```

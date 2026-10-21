@@ -48,6 +48,30 @@ public sealed class ReservationRepository : IReservationRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Reservation>> GetForReportingAsync(
+        DateTime? fromUtc,
+        DateTime? toUtc,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Reservations.AsNoTracking();
+
+        if (fromUtc.HasValue)
+        {
+            var from = NormalizeUtc(fromUtc.Value);
+            query = query.Where(reservation => reservation.Period.EndUtc >= from);
+        }
+
+        if (toUtc.HasValue)
+        {
+            var to = NormalizeUtc(toUtc.Value);
+            query = query.Where(reservation => reservation.Period.StartUtc <= to);
+        }
+
+        return await query
+            .OrderByDescending(reservation => reservation.Period.StartUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Reservation>> GetConfirmedPastEndAsync(
         DateTime utcNow,
         CancellationToken cancellationToken = default)
@@ -65,4 +89,12 @@ public sealed class ReservationRepository : IReservationRepository
             .AsNoTracking()
             .AnyAsync(reservation => reservation.SpaceId == spaceId, cancellationToken);
     }
+
+    private static DateTime NormalizeUtc(DateTime value) =>
+        value.Kind switch
+        {
+            DateTimeKind.Utc => value,
+            DateTimeKind.Local => value.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+        };
 }

@@ -14,6 +14,15 @@ public interface IReservationRepository
 
     Task<IReadOnlyList<Reservation>> GetAllAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Reservations whose period overlaps [fromUtc, toUtc] (inclusive bounds).
+    /// Null bounds mean open-ended on that side.
+    /// </summary>
+    Task<IReadOnlyList<Reservation>> GetForReportingAsync(
+        DateTime? fromUtc,
+        DateTime? toUtc,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<Reservation>> GetConfirmedPastEndAsync(
         DateTime utcNow,
         CancellationToken cancellationToken = default);

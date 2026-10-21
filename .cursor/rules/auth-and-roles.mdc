@@ -1,0 +1,41 @@
+---
+description: Authorization and Manager/Tenant role checks for API and Application
+alwaysApply: true
+---
+
+# Auth & Roles
+
+OfficeFlow has two roles: **Manager** and **Tenant**. Always use `OfficeFlow.Application.Common.Security.Roles` constants — never raw role strings.
+
+## API layer
+
+- Default: `[Authorize]` on controllers that require login.
+- Manager-only mutations/admin reads: `[Authorize(Roles = Roles.Manager)]`.
+- Tenants must not access other tenants' data: compare claim tenant id vs requested id; return `Forbid()` on mismatch.
+- Controllers extract actor identity/role from claims and pass them into commands when authorization is part of the use case (e.g. cancel).
+
+```csharp
+// ✅ GOOD
+[Authorize(Roles = Roles.Manager)]
+public async Task<ActionResult> Confirm(...) { ... }
+
+if (User.IsInRole(Roles.Tenant))
+{
+    var actorTenantId = GetTenantIdFromClaims();
+    if (actorTenantId is null || actorTenantId != tenantId)
+        return Forbid();
+}
+
+// ❌ BAD
+[Authorize(Roles = "manager")]
+if (role == "Tenant") { ... }
+```
+
+## Application layer
+
+- Prefer validating actor role/ownership in FluentValidation or the handler (e.g. `CancelReservationCommand` with `ActorRole` + `ActorTenantId`).
+- Do not trust client-sent "I am a manager" flags without claims-backed values from the API.
+
+## Frontend
+
+- Protect manager-only UI with the same role model; never rely on hiding buttons alone for security — API must enforce.

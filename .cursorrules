@@ -11,20 +11,28 @@ You are an expert software architect and senior full-stack developer specializin
 2. Use English for all code, variable names, class names, and comments.
 3. Keep methods small and strictly follow the Single Responsibility Principle.
 4. Provide unit-testable code. Use Dependency Injection everywhere.
+5. Always ship unit tests with implementations/behavior changes; target ~80% coverage of new/changed logic (see `.cursor/rules/unit-testing.mdc`).
 
 # Backend (C# / .NET) Rules
 1. Domain Layer: Contains only enterprise logic and entities. No database dependencies.
-2. Application Layer: Contains use cases (CQRS pattern with MediatR is preferred), DTOs, and interfaces.
+2. Application Layer: Contains use cases (CQRS pattern with MediatR is preferred), DTOs, and interfaces. Follow `.cursor/rules/cqrs-application-slices.mdc`.
 3. Infrastructure Layer: Contains EF Core DbContext, Repositories, and external service implementations.
 4. API Layer: Controllers/Minimal APIs should be thin. They only receive requests, route them to the Application layer, and return HTTP responses.
 5. Use asynchronous programming (`async`/`await`) for all I/O operations.
 6. Use FluentValidation for request validation.
+7. Auth/roles and UTC/clock: see `.cursor/rules/auth-and-roles.mdc` and `.cursor/rules/utc-and-clock.mdc`.
 
 # Frontend (React / TypeScript) Rules
 1. Always use TypeScript. Avoid `any` types. Define clear interfaces for DTOs matching the backend.
 2. Use functional components and React Hooks.
 3. Separate business logic from UI components (e.g., using custom hooks).
 4. Organize files by feature (e.g., `src/features/reservations`, `src/features/auth`) rather than by type.
+
+# Testing
+1. Backend: xUnit + FluentAssertions in `backend/OfficeFlow.Tests/`, mirroring Domain/Application structure.
+2. Prefer testing Domain and Application (entities, calculators, handlers, validators) over thin controllers.
+3. Tests must be deterministic (fixed clocks, mocked dependencies, no real DB/network).
+4. Do not finish a feature/fix without running relevant tests (`dotnet test`).
 
 # Communication
 Before writing large blocks of code, briefly explain the architectural decision or pattern you are going to use.

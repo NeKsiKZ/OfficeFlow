@@ -1,0 +1,34 @@
+---
+description: UTC dates and injectable clocks for deterministic domain/application logic
+alwaysApply: true
+---
+
+# UTC & Clock
+
+All business timestamps are **UTC**. Keep time testable by injecting the clock instead of calling `DateTime.UtcNow` deep inside domain or calculators.
+
+## Conventions
+
+- Name UTC fields clearly: `CreatedAtUtc`, `FromUtc`, `ToUtc`, `StartTime`/`EndTime` stored/compared as UTC.
+- Domain methods that depend on "now" accept an optional `DateTime? clockUtc` (see `Reservation`) or a required `DateTime` from the caller.
+- Application handlers/calculators take `DateTime` (or optional range bounds) from the outside; prefer passing `DateTime.UtcNow` only at the composition edge (handler entry / background service), not inside pure logic.
+- Normalize unspecified kinds to UTC when persisting (`DateTimeKind.Utc` / `ToUniversalTime()`).
+- Unit tests **must** use fixed clocks — never live `DateTime.UtcNow` for assertions that depend on time.
+
+```csharp
+// ✅ GOOD — injectable clock
+var now = clockUtc ?? DateTime.UtcNow;
+space.EnsureValidReservationPeriod(period, now);
+
+var stats = ManagerStatsCalculator.Calculate(reservations, spaces, now, fromUtc, toUtc);
+
+// ✅ GOOD — test
+var now = new DateTime(2026, 10, 17, 12, 0, 0, DateTimeKind.Utc);
+
+// ❌ BAD — non-deterministic domain/calculator internals
+public Money Calculate(...) => /* uses DateTime.UtcNow inside */;
+```
+
+## API / JSON
+
+- Treat incoming date-times as UTC (or convert explicitly). Do not mix local server time with business rules.

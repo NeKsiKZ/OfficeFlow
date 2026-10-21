@@ -1,0 +1,55 @@
+---
+description: Require unit tests with ~80% coverage for every implementation
+alwaysApply: true
+---
+
+# Unit Testing (Mandatory)
+
+When implementing or changing behavior (features, bug fixes, refactors with logic changes), **ship unit tests in the same change**. Do not consider the task done without tests.
+
+## Coverage target
+
+- Aim for **at least 80% line coverage** of the new or changed production code under test.
+- Prefer testing **Domain** and **Application** logic (entities, value objects, calculators, handlers, validators).
+- Controllers, EF mappings, and pure wiring may stay thin and lightly tested; still cover non-trivial branches.
+
+## What to test
+
+- Happy path and meaningful edge cases (validation failures, lifecycle transitions, empty collections, boundary dates).
+- Pure functions and calculators thoroughly (easy high coverage).
+- Handlers with mocked repository/interface dependencies — assert outcomes and side-effect calls.
+
+## Project conventions (backend)
+
+- Framework: **xUnit** + **FluentAssertions** (match existing tests).
+- Location: `backend/OfficeFlow.Tests/`, mirror Application/Domain folders (e.g. `Application/Reports/...`).
+- Naming: `{SutName}Tests`, methods like `Method_Scenario_ExpectedOutcome` or descriptive `Method_DoesX`.
+- Keep tests deterministic (fixed `DateTime` clocks, no real DB/network).
+
+```csharp
+// ✅ GOOD — focused, deterministic, asserts behavior
+[Fact]
+public void Calculate_EmptyReservations_ReturnsZeroRevenue()
+{
+    var now = new DateTime(2026, 10, 17, 12, 0, 0, DateTimeKind.Utc);
+    var stats = ManagerStatsCalculator.Calculate([], [], now, null, null);
+    stats.Revenue.RecognizedAmount.Should().Be(0m);
+}
+```
+
+```csharp
+// ❌ BAD — skip tests, or only smoke-test without asserting business rules
+public void ItWorks() { /* arrange nothing meaningful */ }
+```
+
+## Frontend
+
+- When adding non-trivial TS logic (hooks, pure helpers, mappers), add unit tests with the project's test runner if present; otherwise extract pure functions so they are easily testable later.
+- UI-only markup changes without logic do not require new unit tests.
+
+## Workflow
+
+1. Implement the production code in a testable way (DI, small methods, pure helpers where possible).
+2. Add/update unit tests covering the changed behavior.
+3. Run the relevant test project (`dotnet test` for backend) before finishing.
+4. If coverage of the touched logic is clearly below ~80%, add missing cases before stopping.
