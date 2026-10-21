@@ -1,6 +1,7 @@
 import {
   useEffect,
   useRef,
+  useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -12,7 +13,7 @@ import {
 import { getCampusMapPalette } from '../campusMapPalette'
 import type { CampusFloor } from '../floors'
 import type { MapPlacement, MapZone } from '../mapLayout'
-import type { Space } from '../types'
+import { formatSpaceRate, SpaceType, type Space } from '../types'
 
 interface CampusMapCanvasProps {
   floor: CampusFloor
@@ -51,6 +52,7 @@ export function CampusMapCanvas({
   const { resolved } = useTheme()
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [roomHoverTip, setRoomHoverTip] = useState<MapPlacement | null>(null)
 
   const sizeRef = useRef({ width: 0, height: 0 })
   const displayRef = useRef<DisplaySnapshot>({ floor, zones, placements })
@@ -99,6 +101,7 @@ export function CampusMapCanvas({
     // Fade out → swap snapshot → fade in (spatial consistency)
     pendingRef.current = next
     contentTargetRef.current = 0
+    setRoomHoverTip(null)
   }, [floor, zones, placements])
 
   useEffect(() => {
@@ -270,6 +273,11 @@ export function CampusMapCanvas({
 
     if (event.pointerType === 'mouse') {
       hoveredIdRef.current = hit?.space.id ?? null
+      const nextTip =
+        hit?.space.type === SpaceType.Room ? hit : null
+      setRoomHoverTip((current) =>
+        current?.space.id === nextTip?.space.id ? current : nextTip,
+      )
     }
 
     setCursor(hit ? 'pointer' : 'default')
@@ -336,6 +344,7 @@ export function CampusMapCanvas({
   function handlePointerLeave() {
     if (!pressedIdRef.current) {
       hoveredIdRef.current = null
+      setRoomHoverTip(null)
       setCursor('default')
     }
   }
@@ -343,20 +352,52 @@ export function CampusMapCanvas({
   return (
     <div
       ref={containerRef}
-      className="of-map-floor relative aspect-[16/10] w-full overflow-hidden rounded-[22px] border border-ink-200/80 shadow-material"
+      className="relative aspect-[16/10] w-full"
     >
-      <canvas
-        ref={canvasRef}
-        role="application"
-        aria-label={ariaLabel}
-        className="block h-full w-full touch-manipulation"
-        style={{ cursor: 'default', touchAction: 'manipulation' }}
-        onPointerMove={handlePointerMove}
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
-        onPointerLeave={handlePointerLeave}
-      />
+      <div className="of-map-floor absolute inset-0 overflow-hidden rounded-[22px] border border-ink-200/80 shadow-material">
+        <canvas
+          ref={canvasRef}
+          role="application"
+          aria-label={ariaLabel}
+          className="block h-full w-full touch-manipulation"
+          style={{ cursor: 'default', touchAction: 'manipulation' }}
+          onPointerMove={handlePointerMove}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
+          onPointerLeave={handlePointerLeave}
+        />
+      </div>
+
+      {roomHoverTip ? (
+        <RoomHoverTooltip placement={roomHoverTip} />
+      ) : null}
+    </div>
+  )
+}
+
+function RoomHoverTooltip({ placement }: { placement: MapPlacement }) {
+  const { space } = placement
+  const area =
+    space.areaSquareMeters != null
+      ? `${space.areaSquareMeters} m²`
+      : 'Area n/a'
+
+  return (
+    <div
+      role="tooltip"
+      className="of-material pointer-events-none absolute z-20 min-w-[9.5rem] rounded-[12px] px-3 py-2 shadow-material"
+      style={{
+        left: `${placement.leftPercent + placement.widthPercent / 2}%`,
+        top: `${placement.topPercent}%`,
+        transform: 'translate(-50%, calc(-100% - 10px))',
+      }}
+    >
+      <p className="text-[0.8125rem] font-semibold tracking-[-0.01em] text-ink-900">
+        {space.name}
+      </p>
+      <p className="of-caption mt-1 text-ink-600">{formatSpaceRate(space)}</p>
+      <p className="of-caption mt-0.5 text-ink-600">{area}</p>
     </div>
   )
 }
