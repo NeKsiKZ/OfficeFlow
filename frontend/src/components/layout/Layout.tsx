@@ -16,7 +16,7 @@ export function Layout() {
   return (
     <div className="min-h-app">
       <header className="of-toolbar">
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5">
+        <div className="relative mx-auto flex max-w-[96rem] items-center justify-between gap-6 px-2 sm:px-3 py-3.5">
           <div className="min-w-0">
             <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
               OfficeFlow
@@ -52,7 +52,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
+      <main className="mx-auto max-w-[96rem] px-2 py-8 sm:px-3 sm:py-10">
         <Outlet />
       </main>
     </div>

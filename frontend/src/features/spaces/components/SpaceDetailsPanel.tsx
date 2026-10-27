@@ -267,330 +267,339 @@ export function SpaceDetailsPanel({ space, onClose }: SpaceDetailsPanelProps) {
   }
 
   return (
-    <>
-      <button
-        type="button"
-        aria-label="Close details"
-        onClick={handleClose}
-        className={[
-          'of-scrim',
-          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
-        ].join(' ')}
-      />
-
-      <aside
-        className={[
-          'of-sheet',
-          isOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0',
-        ].join(' ')}
-        aria-hidden={!isOpen}
-        aria-label="Space details"
-      >
+    <aside
+      className="of-surface flex max-h-[min(88dvh,820px)] flex-col overflow-hidden lg:sticky lg:top-24"
+      aria-label="Space summary"
+    >
+      <div className="flex items-start justify-between gap-3 border-b border-[color:var(--of-separator)] px-5 py-4">
+        <div className="min-w-0">
+          <p className="of-caption text-brand-700">Summary</p>
+          <h2 className="of-title mt-1 truncate">
+            {space
+              ? mode === 'form'
+                ? 'New reservation'
+                : space.name
+              : 'No selection'}
+          </h2>
+        </div>
         {space ? (
-          <>
-            <div className="of-sheet-handle" aria-hidden="true" />
-            <div className="of-material flex items-start justify-between gap-4 border-b border-[color:var(--of-separator)] px-6 pb-5 pt-2">
-              <div>
-                <p className="of-caption text-brand-600">
-                  {mode === 'form' ? 'New reservation' : 'Selected space'}
-                </p>
-                <h2 className="of-title mt-1">{space.name}</h2>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="of-btn-ghost shrink-0 px-2.5 py-1.5 text-[0.8125rem]"
+          >
+            Clear
+          </button>
+        ) : null}
+      </div>
+
+      {!space ? (
+        <div className="flex flex-1 flex-col justify-center gap-2 px-5 py-10">
+          <p className="text-[0.9375rem] font-medium tracking-[-0.01em] text-ink-800">
+            Select a space
+          </p>
+          <p className="of-caption">
+            Choose a desk, room, or parking spot on the map or list to see
+            details and reserve.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="of-sheet-body flex-1 space-y-4 px-5 py-4">
+            {successMessage ? (
+              <div className="of-alert-success" role="status">
+                {successMessage}
               </div>
-              <button type="button" onClick={handleClose} className="of-btn-ghost">
-                Close
-              </button>
-            </div>
+            ) : null}
 
-            <div className="of-sheet-body flex-1 space-y-5 px-6 py-5">
-              {successMessage ? (
-                <div className="of-alert-success" role="status">
-                  {successMessage}
-                </div>
-              ) : null}
-
+            <div className="space-y-3">
               <DetailRow label="Type" value={getSpaceTypeLabel(space.type)} />
               <DetailRow label="Code" value={space.code} />
               <DetailRow
                 label="Floor"
                 value={formatFloorLabel(space.floorNumber)}
               />
-              <DetailRow label="Rate" value={formatSpaceRate(space)} emphasis />
+              <DetailRow
+                label="Rate"
+                value={formatSpaceRate(space)}
+                emphasis
+              />
+            </div>
 
-              {mode === 'details' ? (
-                <>
-                  {space.description ? (
-                    <DetailRow label="Description" value={space.description} />
-                  ) : null}
-                  {space.capacity != null ? (
-                    <DetailRow
-                      label="Capacity"
-                      value={`${space.capacity} people`}
-                    />
-                  ) : null}
-                  {space.areaSquareMeters != null ? (
-                    <DetailRow
-                      label="Area"
-                      value={`${space.areaSquareMeters} m²`}
-                    />
-                  ) : null}
-                  {space.spotNumber ? (
-                    <DetailRow label="Spot" value={space.spotNumber} />
-                  ) : null}
+            {mode === 'details' ? (
+              <div className="space-y-3 border-t border-[color:var(--of-separator)] pt-4">
+                {space.description ? (
+                  <DetailRow label="Description" value={space.description} />
+                ) : null}
+                {space.capacity != null ? (
                   <DetailRow
-                    label="Status"
-                    value={space.isActive ? 'Available' : 'Inactive'}
+                    label="Capacity"
+                    value={`${space.capacity} people`}
                   />
-                </>
-              ) : (
-                <form
-                  id="reservation-form"
-                  className="space-y-4"
-                  onSubmit={handleSubmit}
-                >
-                  <label className="block space-y-1.5">
-                    <span className="of-label">Najemca</span>
-                    <select
-                      required
-                      value={tenantId}
-                      onChange={(event) => setTenantId(event.target.value)}
-                      disabled={isLoadingTenants || tenants.length === 0}
-                      className="of-field"
-                    >
-                      {isLoadingTenants ? (
-                        <option value="">Loading tenants...</option>
-                      ) : null}
-                      {!isLoadingTenants && tenants.length === 0 ? (
-                        <option value="">No tenants available</option>
-                      ) : null}
-                      {tenants.map((tenant) => (
-                        <option key={tenant.id} value={tenant.id}>
-                          {getTenantDisplayName(tenant)} — {tenant.email}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                ) : null}
+                {space.areaSquareMeters != null ? (
+                  <DetailRow
+                    label="Area"
+                    value={`${space.areaSquareMeters} m²`}
+                  />
+                ) : null}
+                {space.spotNumber ? (
+                  <DetailRow label="Spot" value={space.spotNumber} />
+                ) : null}
+                <DetailRow
+                  label="Status"
+                  value={space.isActive ? 'Available' : 'Inactive'}
+                />
+              </div>
+            ) : (
+              <form
+                id="reservation-form"
+                className="space-y-4 border-t border-[color:var(--of-separator)] pt-4"
+                onSubmit={handleSubmit}
+              >
+                <label className="block space-y-1.5">
+                  <span className="of-label">Najemca</span>
+                  <select
+                    required
+                    value={tenantId}
+                    onChange={(event) => setTenantId(event.target.value)}
+                    disabled={isLoadingTenants || tenants.length === 0}
+                    className="of-field"
+                  >
+                    {isLoadingTenants ? (
+                      <option value="">Loading tenants...</option>
+                    ) : null}
+                    {!isLoadingTenants && tenants.length === 0 ? (
+                      <option value="">No tenants available</option>
+                    ) : null}
+                    {tenants.map((tenant) => (
+                      <option key={tenant.id} value={tenant.id}>
+                        {getTenantDisplayName(tenant)} — {tenant.email}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-                  {tenantsError ? (
-                    <p className="of-alert-error">{tenantsError}</p>
-                  ) : null}
+                {tenantsError ? (
+                  <p className="of-alert-error">{tenantsError}</p>
+                ) : null}
 
-                  {monthly ? (
-                    <>
-                      <p className="of-caption">
-                        Rooms are billed per calendar month. Choose a start date
-                        and how many months to rent.
-                      </p>
+                {monthly ? (
+                  <>
+                    <p className="of-caption">
+                      Rooms are billed per calendar month. Choose a start date
+                      and how many months to rent.
+                    </p>
 
-                      <label className="block space-y-1.5">
-                        <span className="of-label">Start date</span>
-                        <input
-                          required
-                          type="date"
-                          value={roomStartDate}
-                          min={toDateInputValue(new Date())}
-                          onChange={(event) =>
-                            setRoomStartDate(event.target.value)
-                          }
-                          className="of-field"
-                        />
-                      </label>
+                    <label className="block space-y-1.5">
+                      <span className="of-label">Start date</span>
+                      <input
+                        required
+                        type="date"
+                        value={roomStartDate}
+                        min={toDateInputValue(new Date())}
+                        onChange={(event) =>
+                          setRoomStartDate(event.target.value)
+                        }
+                        className="of-field"
+                      />
+                    </label>
 
-                      <label className="block space-y-1.5">
-                        <span className="of-label">Duration</span>
-                        <select
-                          required
-                          value={monthCount}
-                          onChange={(event) =>
-                            setMonthCount(Number(event.target.value))
-                          }
-                          className="of-field"
-                        >
-                          {monthOptions(ROOM_MAX_MONTHS).map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                    <label className="block space-y-1.5">
+                      <span className="of-label">Duration</span>
+                      <select
+                        required
+                        value={monthCount}
+                        onChange={(event) =>
+                          setMonthCount(Number(event.target.value))
+                        }
+                        className="of-field"
+                      >
+                        {monthOptions(ROOM_MAX_MONTHS).map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
 
-                      {monthlyPeriodPreview ? (
-                        <div className="of-alert-info space-y-1">
+                    {monthlyPeriodPreview ? (
+                      <div className="of-alert-info space-y-1">
+                        <p>
+                          Ends{' '}
+                          <span className="font-semibold text-ink-900">
+                            {formatUtcDateLabel(monthlyPeriodPreview.endTime)}
+                          </span>{' '}
+                          (UTC calendar)
+                        </p>
+                        {estimatedTotal != null ? (
                           <p>
-                            Ends{' '}
-                            <span className="font-semibold text-ink-900">
-                              {formatUtcDateLabel(monthlyPeriodPreview.endTime)}
-                            </span>{' '}
-                            (UTC calendar)
-                          </p>
-                          {estimatedTotal != null ? (
-                            <p>
-                              Estimated total:{' '}
-                              <span className="font-semibold text-brand-700">
-                                {estimatedTotal.toFixed(2)}{' '}
-                                {space.currency ?? 'PLN'}
-                              </span>
-                            </p>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <p className="of-caption">
-                        Hourly booking: 1–12 hours. End must be after start.
-                      </p>
-
-                      <label className="block space-y-1.5">
-                        <span className="of-label">Start</span>
-                        <input
-                          required
-                          type="datetime-local"
-                          value={startTime}
-                          onChange={(event) => setStartTime(event.target.value)}
-                          className="of-field"
-                        />
-                      </label>
-
-                      <label className="block space-y-1.5">
-                        <span className="of-label">End</span>
-                        <input
-                          required
-                          type="datetime-local"
-                          value={endTime}
-                          min={startTime}
-                          onChange={(event) => setEndTime(event.target.value)}
-                          className="of-field"
-                        />
-                      </label>
-
-                      {estimatedTotal != null ? (
-                        <div className="of-alert-info">
-                          Estimated total:{' '}
-                          <span className="font-semibold text-brand-700">
-                            {estimatedTotal.toFixed(2)} {space.currency ?? 'PLN'}
-                          </span>
-                        </div>
-                      ) : null}
-                    </>
-                  )}
-
-                  <fieldset className="space-y-2">
-                    <legend className="of-label">Additional services</legend>
-                    {isLoadingServices ? (
-                      <p className="of-caption">Loading services...</p>
-                    ) : null}
-                    {servicesError ? (
-                      <p className="of-alert-error">{servicesError}</p>
-                    ) : null}
-                    {!isLoadingServices &&
-                    !servicesError &&
-                    availableServices.length === 0 ? (
-                      <p className="of-caption">
-                        No optional services for this space type.
-                      </p>
-                    ) : null}
-                    {!isLoadingServices && availableServices.length > 0 ? (
-                      <div className="space-y-2">
-                        {availableServices.map((service) => {
-                          const checked = selectedServiceIds.includes(service.id)
-                          return (
-                            <label
-                              key={service.id}
-                              className="flex cursor-pointer items-start gap-3 rounded-[12px] bg-[rgba(118,118,128,0.08)] px-3 py-2.5"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() => toggleService(service.id)}
-                                className="mt-1 h-4 w-4 accent-brand-600"
-                              />
-                              <span className="min-w-0 flex-1">
-                                <span className="block text-[0.9375rem] font-medium tracking-[-0.01em] text-ink-900">
-                                  {service.name} —{' '}
-                                  {formatServicePrice(service, {
-                                    perMonth: monthly,
-                                  })}
-                                </span>
-                                {service.description ? (
-                                  <span className="of-caption mt-0.5 block">
-                                    {service.description}
-                                  </span>
-                                ) : null}
-                              </span>
-                            </label>
-                          )
-                        })}
-                        {selectedServiceIds.length > 0 ? (
-                          <p className="of-caption pt-1">
-                            Selected add-ons:{' '}
+                            Estimated total:{' '}
                             <span className="font-semibold text-brand-700">
-                              {selectedServicesTotal.toFixed(2)} PLN
+                              {estimatedTotal.toFixed(2)}{' '}
+                              {space.currency ?? 'PLN'}
                             </span>
-                            {monthly ? (
-                              <span>
-                                {' '}
-                                ({serviceUnitTotal.toFixed(2)} × {monthCount} mo)
-                              </span>
-                            ) : null}
                           </p>
                         ) : null}
                       </div>
                     ) : null}
-                  </fieldset>
+                  </>
+                ) : (
+                  <>
+                    <p className="of-caption">
+                      Hourly booking: 1–12 hours. End must be after start.
+                    </p>
 
-                  {submitError ? (
-                    <p className="of-alert-error">{submitError}</p>
+                    <label className="block space-y-1.5">
+                      <span className="of-label">Start</span>
+                      <input
+                        required
+                        type="datetime-local"
+                        value={startTime}
+                        onChange={(event) => setStartTime(event.target.value)}
+                        className="of-field"
+                      />
+                    </label>
+
+                    <label className="block space-y-1.5">
+                      <span className="of-label">End</span>
+                      <input
+                        required
+                        type="datetime-local"
+                        value={endTime}
+                        min={startTime}
+                        onChange={(event) => setEndTime(event.target.value)}
+                        className="of-field"
+                      />
+                    </label>
+
+                    {estimatedTotal != null ? (
+                      <div className="of-alert-info">
+                        Estimated total:{' '}
+                        <span className="font-semibold text-brand-700">
+                          {estimatedTotal.toFixed(2)} {space.currency ?? 'PLN'}
+                        </span>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+
+                <fieldset className="space-y-2">
+                  <legend className="of-label">Additional services</legend>
+                  {isLoadingServices ? (
+                    <p className="of-caption">Loading services...</p>
                   ) : null}
-                </form>
-              )}
-            </div>
+                  {servicesError ? (
+                    <p className="of-alert-error">{servicesError}</p>
+                  ) : null}
+                  {!isLoadingServices &&
+                  !servicesError &&
+                  availableServices.length === 0 ? (
+                    <p className="of-caption">
+                      No optional services for this space type.
+                    </p>
+                  ) : null}
+                  {!isLoadingServices && availableServices.length > 0 ? (
+                    <div className="space-y-2">
+                      {availableServices.map((service) => {
+                        const checked = selectedServiceIds.includes(service.id)
+                        return (
+                          <label
+                            key={service.id}
+                            className="flex cursor-pointer items-start gap-3 rounded-[12px] bg-[color:var(--of-fill)] px-3 py-2.5"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleService(service.id)}
+                              className="mt-1 h-4 w-4 accent-brand-600"
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-[0.9375rem] font-medium tracking-[-0.01em] text-ink-900">
+                                {service.name} —{' '}
+                                {formatServicePrice(service, {
+                                  perMonth: monthly,
+                                })}
+                              </span>
+                              {service.description ? (
+                                <span className="of-caption mt-0.5 block">
+                                  {service.description}
+                                </span>
+                              ) : null}
+                            </span>
+                          </label>
+                        )
+                      })}
+                      {selectedServiceIds.length > 0 ? (
+                        <p className="of-caption pt-1">
+                          Selected add-ons:{' '}
+                          <span className="font-semibold text-brand-700">
+                            {selectedServicesTotal.toFixed(2)} PLN
+                          </span>
+                          {monthly ? (
+                            <span>
+                              {' '}
+                              ({serviceUnitTotal.toFixed(2)} × {monthCount} mo)
+                            </span>
+                          ) : null}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </fieldset>
 
-            <div className="of-material space-y-2 border-t border-[color:var(--of-separator)] px-6 py-5">
-              {mode === 'details' ? (
+                {submitError ? (
+                  <p className="of-alert-error">{submitError}</p>
+                ) : null}
+              </form>
+            )}
+          </div>
+
+          <div className="space-y-2 border-t border-[color:var(--of-separator)] px-5 py-4">
+            {mode === 'details' ? (
+              <button
+                type="button"
+                disabled={!space.isActive}
+                onClick={() => {
+                  setSuccessMessage(null)
+                  setSubmitError(null)
+                  setMode('form')
+                }}
+                className="of-btn-primary w-full py-3.5"
+              >
+                Zarezerwuj
+              </button>
+            ) : (
+              <>
                 <button
-                  type="button"
-                  disabled={!space.isActive}
-                  onClick={() => {
-                    setSuccessMessage(null)
-                    setSubmitError(null)
-                    setMode('form')
-                  }}
+                  type="submit"
+                  form="reservation-form"
+                  disabled={
+                    isSubmitting ||
+                    isLoadingTenants ||
+                    !tenantId ||
+                    tenants.length === 0
+                  }
                   className="of-btn-primary w-full py-3.5"
                 >
-                  Zarezerwuj
+                  {isSubmitting ? 'Saving...' : 'Potwierdź rezerwację'}
                 </button>
-              ) : (
-                <>
-                  <button
-                    type="submit"
-                    form="reservation-form"
-                    disabled={
-                      isSubmitting ||
-                      isLoadingTenants ||
-                      !tenantId ||
-                      tenants.length === 0
-                    }
-                    className="of-btn-primary w-full py-3.5"
-                  >
-                    {isSubmitting ? 'Saving...' : 'Potwierdź rezerwację'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode('details')
-                      setSubmitError(null)
-                    }}
-                    className="of-btn-secondary w-full"
-                  >
-                    Anuluj
-                  </button>
-                </>
-              )}
-            </div>
-          </>
-        ) : null}
-      </aside>
-    </>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('details')
+                    setSubmitError(null)
+                  }}
+                  className="of-btn-secondary w-full"
+                >
+                  Anuluj
+                </button>
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </aside>
   )
 }
 
