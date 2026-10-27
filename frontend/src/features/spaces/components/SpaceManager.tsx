@@ -1,7 +1,13 @@
 import axios from 'axios'
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { PageHeader } from '../../../components/ui/PageHeader'
+import { PaginationBar } from '../../../components/ui/PaginationBar'
 import { LoadingBlock, StatusBlock } from '../../../components/ui/StatusBlock'
+import { useClientPagination } from '../../../hooks/useClientPagination'
+import {
+  filterSpaces,
+  type ManageSpaceFilters,
+} from '../filterSpaces'
 import { CAMPUS_FLOORS, formatFloorLabel } from '../floors'
 import { useSpaces } from '../hooks/useSpaces'
 import { createSpace, deleteSpace } from '../spacesApi'
@@ -11,6 +17,7 @@ import {
   SpaceType,
   type SpaceType as SpaceTypeValue,
 } from '../types'
+import { ManageSpaceFilterBar } from './ManageSpaceFilterBar'
 
 function getApiErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
@@ -56,6 +63,7 @@ function buildSpaceCode(name: string, type: SpaceTypeValue): string {
 
 export function SpaceManager() {
   const { spaces, isLoading, error, refetch } = useSpaces()
+  const [filters, setFilters] = useState<ManageSpaceFilters>({})
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [name, setName] = useState('')
   const [type, setType] = useState<SpaceTypeValue>(SpaceType.Desk)
@@ -65,6 +73,12 @@ export function SpaceManager() {
   const [actionError, setActionError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const filteredSpaces = useMemo(
+    () => filterSpaces(spaces, filters),
+    [spaces, filters],
+  )
+  const pagination = useClientPagination(filteredSpaces)
 
   function resetForm() {
     setName('')
@@ -248,6 +262,10 @@ export function SpaceManager() {
         <StatusBlock tone="error">{actionError}</StatusBlock>
       ) : null}
 
+      {!isLoading && !error && spaces.length > 0 ? (
+        <ManageSpaceFilterBar filters={filters} onChange={setFilters} />
+      ) : null}
+
       {isLoading ? <LoadingBlock label="Loading spaces..." /> : null}
 
       {error ? (
@@ -265,59 +283,85 @@ export function SpaceManager() {
       ) : null}
 
       {!isLoading && !error ? (
-        <div className="of-surface of-enter-delayed overflow-x-auto">
-          <table className="min-w-full divide-y divide-[color:var(--of-separator)] text-left text-[0.875rem]">
-            <thead className="bg-ink-50/80 text-ink-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Code</th>
-                <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">Price</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[color:var(--of-separator)]">
-              {spaces.length === 0 ? (
+        <div className="space-y-3">
+          <div className="of-surface of-enter-delayed overflow-x-auto">
+            <table className="min-w-full divide-y divide-[color:var(--of-separator)] text-left text-[0.875rem]">
+              <thead className="bg-ink-50/80 text-ink-500">
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-ink-400">
-                    No spaces in the database yet.
-                  </td>
+                  <th className="px-4 py-3 font-medium">Name</th>
+                  <th className="px-4 py-3 font-medium">Code</th>
+                  <th className="px-4 py-3 font-medium">Type</th>
+                  <th className="px-4 py-3 font-medium">Price</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
-              ) : (
-                spaces.map((space) => (
-                  <tr
-                    key={space.id}
-                    className="of-row text-ink-800"
-                  >
-                    <td className="px-4 py-3 font-medium tracking-[-0.01em]">
-                      {space.name}
-                    </td>
-                    <td className="px-4 py-3 text-ink-500">{space.code}</td>
-                    <td className="px-4 py-3">
-                      {getSpaceTypeLabel(space.type)}
-                    </td>
-                    <td className="px-4 py-3">{formatSpaceRate(space)}</td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex rounded-pill bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
-                        {space.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(space.id, space.name)}
-                        disabled={deletingId === space.id}
-                        className="of-btn-danger"
-                      >
-                        {deletingId === space.id ? 'Deleting...' : 'Usuń'}
-                      </button>
+              </thead>
+              <tbody className="divide-y divide-[color:var(--of-separator)]">
+                {spaces.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-4 py-10 text-center text-ink-400"
+                    >
+                      No spaces in the database yet.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : filteredSpaces.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-4 py-10 text-center text-ink-400"
+                    >
+                      No spaces match the selected filters.
+                    </td>
+                  </tr>
+                ) : (
+                  pagination.items.map((space) => (
+                    <tr key={space.id} className="of-row text-ink-800">
+                      <td className="px-4 py-3 font-medium tracking-[-0.01em]">
+                        {space.name}
+                      </td>
+                      <td className="px-4 py-3 text-ink-500">{space.code}</td>
+                      <td className="px-4 py-3">
+                        {getSpaceTypeLabel(space.type)}
+                      </td>
+                      <td className="px-4 py-3">{formatSpaceRate(space)}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex rounded-pill bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
+                          {space.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void handleDelete(space.id, space.name)
+                          }
+                          disabled={deletingId === space.id}
+                          className="of-btn-danger"
+                        >
+                          {deletingId === space.id ? 'Deleting...' : 'Usuń'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          {filteredSpaces.length > 0 ? (
+            <PaginationBar
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalItems}
+              from={pagination.from}
+              to={pagination.to}
+              canGoPrev={pagination.canGoPrev}
+              canGoNext={pagination.canGoNext}
+              onPrev={pagination.goPrev}
+              onNext={pagination.goNext}
+            />
+          ) : null}
         </div>
       ) : null}
     </section>

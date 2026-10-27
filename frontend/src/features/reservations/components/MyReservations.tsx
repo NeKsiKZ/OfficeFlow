@@ -1,14 +1,21 @@
 import axios from 'axios'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { PageHeader } from '../../../components/ui/PageHeader'
+import { PaginationBar } from '../../../components/ui/PaginationBar'
 import { LoadingBlock, StatusBlock } from '../../../components/ui/StatusBlock'
+import { useClientPagination } from '../../../hooks/useClientPagination'
 import { getAuthUser } from '../../auth/auth'
+import {
+  filterReservations,
+  type ReservationFilters,
+} from '../filterReservations'
 import { cancelReservation, fetchReservationsByTenant } from '../reservationsApi'
 import {
   canCancelReservation,
   getReservationStatusLabel,
   type Reservation,
 } from '../types'
+import { ReservationFilterBar } from './ReservationFilterBar'
 
 function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat(undefined, {
@@ -32,10 +39,17 @@ function getApiErrorMessage(error: unknown, fallback: string): string {
 export function MyReservations() {
   const user = getAuthUser()
   const [reservations, setReservations] = useState<Reservation[]>([])
+  const [filters, setFilters] = useState<ReservationFilters>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+
+  const filteredReservations = useMemo(
+    () => filterReservations(reservations, filters),
+    [reservations, filters],
+  )
+  const pagination = useClientPagination(filteredReservations)
 
   const loadReservations = useCallback(async () => {
     if (!user?.tenantId) {
@@ -90,6 +104,10 @@ export function MyReservations() {
         description="History of your bookings with period and calculated cost."
       />
 
+      {!isLoading && !error && reservations.length > 0 ? (
+        <ReservationFilterBar filters={filters} onChange={setFilters} />
+      ) : null}
+
       {isLoading ? <LoadingBlock label="Loading reservations..." /> : null}
 
       {error ? (
@@ -108,8 +126,15 @@ export function MyReservations() {
         </StatusBlock>
       ) : null}
 
-      {!isLoading && !error && reservations.length > 0 ? (
-        <>
+      {!isLoading &&
+      !error &&
+      reservations.length > 0 &&
+      filteredReservations.length === 0 ? (
+        <StatusBlock>No reservations match the selected filters.</StatusBlock>
+      ) : null}
+
+      {!isLoading && !error && filteredReservations.length > 0 ? (
+        <div className="space-y-3">
           <div className="of-surface of-enter-delayed hidden overflow-hidden md:block">
             <table className="min-w-full divide-y divide-[color:var(--of-separator)] text-left text-[0.875rem]">
               <thead className="bg-ink-50/80 text-ink-500">
@@ -123,7 +148,7 @@ export function MyReservations() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[color:var(--of-separator)]">
-                {reservations.map((reservation) => (
+                {pagination.items.map((reservation) => (
                   <tr key={reservation.id} className="of-row">
                     <td className="px-4 py-3 font-medium tracking-[-0.01em] text-ink-900">
                       {reservation.spaceName}
@@ -164,7 +189,7 @@ export function MyReservations() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:hidden">
-            {reservations.map((reservation) => (
+            {pagination.items.map((reservation) => (
               <article
                 key={reservation.id}
                 className="of-surface of-enter-delayed space-y-3 p-4"
@@ -197,7 +222,19 @@ export function MyReservations() {
               </article>
             ))}
           </div>
-        </>
+
+          <PaginationBar
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            from={pagination.from}
+            to={pagination.to}
+            canGoPrev={pagination.canGoPrev}
+            canGoNext={pagination.canGoNext}
+            onPrev={pagination.goPrev}
+            onNext={pagination.goNext}
+          />
+        </div>
       ) : null}
     </section>
   )

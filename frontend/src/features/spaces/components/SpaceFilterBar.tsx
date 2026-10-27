@@ -67,11 +67,14 @@ export function SpaceFilterBar({ filters, onChange }: SpaceFilterBarProps) {
         />
       </label>
 
-      <div className="flex items-end">
+      <div className="block space-y-1.5">
+        <span className="of-label invisible select-none" aria-hidden="true">
+          Clear
+        </span>
         <button
           type="button"
           onClick={() => onChange({})}
-          className="of-btn-secondary w-full"
+          className="of-btn-field"
         >
           Clear filters
         </button>
