@@ -1,0 +1,40 @@
+---
+description: Reservation status transitions and lifecycle invariants
+alwaysApply: true
+---
+
+# Reservation Lifecycle
+
+OfficeFlow reservations use exactly four statuses in `ReservationStatus`:
+
+`Pending` → `Confirmed` → `Completed`  
+          ↘ `Cancelled` (from Pending or Confirmed only)
+
+## Allowed transitions
+
+| From | To | How |
+| --- | --- | --- |
+| — | `Pending` | Create reservation |
+| `Pending` | `Confirmed` | Manager `Confirm()` / `POST …/confirm` |
+| `Pending` or `Confirmed` | `Cancelled` | Manager or owning Tenant `Cancel()` / `POST …/cancel` |
+| `Confirmed` | `Completed` | `TryCompleteIfDue` when `Period.EndUtc <= now` (background job) |
+
+## Rules
+
+- **Do not add** statuses like `Rejected`, `Paid`, `Expired` to `ReservationStatus`.
+- Payment (if introduced later) is a **separate** concept (`PaymentStatus` / payment entity), not a reservation status.
+- Domain methods live on `Reservation`: `Confirm()`, `Cancel()`, `Complete()`, `TryCompleteIfDue(utcNow)`.
+- Auto-complete only for **Confirmed** past end; never invent other auto-transitions.
+- Recalculate cost only while `Pending` or `Confirmed`.
+- API: Manager confirms; cancel allowed for Manager or owning Tenant (claims) — see `auth-and-roles.mdc`.
+- Frontend: expose Confirm/Cancel only for valid statuses; do not invent extra status chips.
+
+```csharp
+// ✅ GOOD
+reservation.Confirm();
+reservation.TryCompleteIfDue(clockUtc);
+
+// ❌ BAD — new enum value or illegal jump
+Status = ReservationStatus.Rejected;
+reservation.Complete(); // while still Pending
+```

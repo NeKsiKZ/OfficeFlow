@@ -7,8 +7,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
-    <meta name="theme-color" content="#050607" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#2A2830" />
+    <meta name="color-scheme" content="dark light" />
     <title>OfficeFlow</title>
     <script>
       (() => {
@@ -27,7 +27,7 @@
           document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
           const themeMeta = document.querySelector('meta[name="theme-color"]')
           if (themeMeta) {
-            themeMeta.setAttribute('content', dark ? '#050607' : '#f3f4f3')
+            themeMeta.setAttribute('content', dark ? '#2A2830' : '#F3F2F4')
           }
         } catch (_) {}
       })()

@@ -4,59 +4,59 @@
 
 @layer base {
   :root {
-    /* Light: mostly neutral + soft sage accent (~5–10%) */
-    --of-bg: #f3f4f3;
+    /* Light fallback — same dusty-rose family as dark-first */
+    --of-bg: #f3f2f4;
     --of-bg-elevated: rgba(255, 255, 255, 0.94);
     --of-bg-solid: #ffffff;
     --of-bg-material-thick: #ffffff;
     --of-bg-sheet: #ffffff;
-    --of-bg-field: #e9ebea;
-    --of-bg-field-hover: #e2e5e3;
+    --of-bg-field: #e9e8eb;
+    --of-bg-field-hover: #e2e1e5;
     --of-bg-field-focus: #ffffff;
-    --of-bg-row-hover: rgba(0, 0, 0, 0.035);
-    --of-ink: #0c0f0d;
-    --of-ink-secondary: #6b726f;
-    --of-separator: rgba(0, 0, 0, 0.1);
-    --of-fill: rgba(0, 0, 0, 0.055);
-    --of-fill-strong: rgba(0, 0, 0, 0.09);
-    --of-brand: #3d5c4e;
-    --of-on-brand: #f4f7f5;
-    --of-brand-soft: rgba(61, 92, 78, 0.12);
-    --of-danger: #dc2626;
-    --of-danger-soft: rgba(220, 38, 38, 0.1);
-    --of-danger-soft-strong: rgba(220, 38, 38, 0.16);
-    --of-success-ink: #1f3d30;
-    --of-success-soft: rgba(61, 92, 78, 0.1);
-    --of-alert-error-ink: #991b1b;
+    --of-bg-row-hover: rgba(42, 40, 46, 0.04);
+    --of-ink: #2a282e;
+    --of-ink-secondary: #6b686f;
+    --of-separator: rgba(42, 40, 46, 0.12);
+    --of-fill: rgba(42, 40, 46, 0.06);
+    --of-fill-strong: rgba(42, 40, 46, 0.1);
+    --of-brand: #8b6e6e;
+    --of-on-brand: #f7f4f4;
+    --of-brand-soft: rgba(113, 90, 90, 0.14);
+    --of-danger: #d17a7a;
+    --of-danger-soft: rgba(209, 122, 122, 0.12);
+    --of-danger-soft-strong: rgba(209, 122, 122, 0.18);
+    --of-success-ink: #4a4548;
+    --of-success-soft: rgba(113, 90, 90, 0.1);
+    --of-alert-error-ink: #9b4545;
     --of-highlight-inset: rgba(255, 255, 255, 0.8);
     --of-highlight-inset-strong: rgba(255, 255, 255, 0.9);
-    --of-toolbar-fade: rgba(243, 244, 243, 0.72);
-    --of-map-floor: #e6e8e6;
-    --of-map-floor-grid: rgba(0, 0, 0, 0.055);
-    --of-map-zone: rgba(61, 92, 78, 0.04);
+    --of-toolbar-fade: rgba(243, 242, 244, 0.72);
+    --of-map-floor: #e9e8eb;
+    --of-map-floor-grid: rgba(42, 40, 46, 0.055);
+    --of-map-zone: rgba(113, 90, 90, 0.05);
     --of-blur: 12px;
-    --of-shadow-material: 0 0 0 1px rgba(0, 0, 0, 0.06);
-    --of-shadow-sheet: 0 -8px 40px rgba(0, 0, 0, 0.12);
-    --of-shadow-material-hover: 0 0 0 1px rgba(61, 92, 78, 0.18);
-    --of-shadow-tile-hover: 0 0 0 1px rgba(61, 92, 78, 0.22);
+    --of-shadow-material: 0 0 0 1px rgba(42, 40, 46, 0.1);
+    --of-shadow-sheet: 0 -8px 40px rgba(42, 40, 46, 0.12);
+    --of-shadow-material-hover: 0 0 0 1px rgba(113, 90, 90, 0.28);
+    --of-shadow-tile-hover: 0 0 0 1px rgba(113, 90, 90, 0.32);
 
-    --of-ink-50: 248 249 248;
-    --of-ink-100: 240 242 240;
-    --of-ink-200: 226 230 227;
-    --of-ink-400: 148 156 152;
-    --of-ink-500: 107 114 111;
-    --of-ink-600: 74 82 78;
-    --of-ink-700: 52 60 56;
-    --of-ink-800: 32 38 35;
-    --of-ink-900: 12 15 13;
+    --of-ink-50: 243 242 244;
+    --of-ink-100: 233 232 235;
+    --of-ink-200: 214 212 218;
+    --of-ink-400: 122 128 126;
+    --of-ink-500: 107 104 111;
+    --of-ink-600: 84 80 88;
+    --of-ink-700: 58 55 64;
+    --of-ink-800: 42 40 46;
+    --of-ink-900: 42 40 46;
 
-    --of-brand-50: 240 245 242;
-    --of-brand-100: 222 232 226;
-    --of-brand-200: 186 204 194;
-    --of-brand-500: 61 92 78;
-    --of-brand-600: 61 92 78;
-    --of-brand-700: 42 68 56;
-    --of-brand-800: 28 48 38;
+    --of-brand-50: 244 240 240;
+    --of-brand-100: 232 222 222;
+    --of-brand-200: 200 180 180;
+    --of-brand-500: 113 90 90;
+    --of-brand-600: 139 110 110;
+    --of-brand-700: 113 90 90;
+    --of-brand-800: 90 70 70;
 
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -65,58 +65,59 @@
   }
 
   .dark {
-    /* Noir + ~5–10% cool accent (muted teal) — still mostly black/graphite */
-    --of-bg: #050607;
-    --of-bg-elevated: rgba(16, 18, 18, 0.94);
-    --of-bg-solid: #121415;
-    --of-bg-material-thick: #131516;
-    --of-bg-sheet: #131516;
-    --of-bg-field: #1a1c1d;
-    --of-bg-field-hover: #222526;
-    --of-bg-field-focus: #1a1c1d;
-    --of-bg-row-hover: rgba(255, 255, 255, 0.04);
-    --of-ink: #f4f6f5;
-    --of-ink-secondary: #9ca3a1;
-    --of-separator: rgba(255, 255, 255, 0.1);
-    --of-fill: rgba(255, 255, 255, 0.07);
-    --of-fill-strong: rgba(255, 255, 255, 0.12);
-    --of-brand: #8faba0;
-    --of-on-brand: #07100c;
-    --of-brand-soft: rgba(143, 171, 160, 0.16);
-    --of-danger: #f87171;
-    --of-danger-soft: rgba(248, 113, 113, 0.12);
-    --of-danger-soft-strong: rgba(248, 113, 113, 0.2);
-    --of-success-ink: #b7cfc4;
-    --of-success-soft: rgba(143, 171, 160, 0.12);
-    --of-alert-error-ink: #fecaca;
-    --of-highlight-inset: rgba(255, 255, 255, 0.05);
-    --of-highlight-inset-strong: rgba(255, 255, 255, 0.08);
-    --of-toolbar-fade: rgba(5, 6, 7, 0.88);
-    --of-map-floor: #0a0b0c;
-    --of-map-floor-grid: rgba(255, 255, 255, 0.045);
-    --of-map-zone: rgba(143, 171, 160, 0.04);
-    --of-shadow-material: 0 0 0 1px rgba(255, 255, 255, 0.07);
-    --of-shadow-sheet: 0 -12px 48px rgba(0, 0, 0, 0.7);
-    --of-shadow-material-hover: 0 0 0 1px rgba(143, 171, 160, 0.22);
-    --of-shadow-tile-hover: 0 0 0 1px rgba(143, 171, 160, 0.28);
+    /* Dark-first, contrast-tuned: deeper canvas, lifted ink + brand fill */
+    --of-bg: #2a2830;
+    --of-bg-elevated: rgba(68, 68, 78, 0.94);
+    --of-bg-solid: #44444e;
+    --of-bg-material-thick: #44444e;
+    --of-bg-sheet: #44444e;
+    --of-bg-field: #37353e;
+    --of-bg-field-hover: #3e3c46;
+    --of-bg-field-focus: #37353e;
+    --of-bg-row-hover: rgba(232, 237, 235, 0.07);
+    --of-ink: #e8edeb;
+    --of-ink-secondary: #b4bbba;
+    --of-separator: rgba(232, 237, 235, 0.18);
+    --of-fill: rgba(232, 237, 235, 0.1);
+    --of-fill-strong: rgba(232, 237, 235, 0.16);
+    --of-brand: #8b6e6e;
+    --of-on-brand: #f7f4f4;
+    --of-brand-soft: rgba(113, 90, 90, 0.28);
+    --of-danger: #e08a8a;
+    --of-danger-soft: rgba(224, 138, 138, 0.16);
+    --of-danger-soft-strong: rgba(224, 138, 138, 0.24);
+    --of-success-ink: #c5d0c9;
+    --of-success-soft: rgba(139, 110, 110, 0.16);
+    --of-alert-error-ink: #f5c4c4;
+    --of-highlight-inset: rgba(255, 255, 255, 0.06);
+    --of-highlight-inset-strong: rgba(255, 255, 255, 0.1);
+    --of-toolbar-fade: rgba(42, 40, 48, 0.88);
+    --of-map-floor: #24222a;
+    --of-map-floor-grid: rgba(232, 237, 235, 0.06);
+    --of-map-zone: rgba(139, 110, 110, 0.1);
+    --of-shadow-material: 0 0 0 1px rgba(232, 237, 235, 0.14);
+    --of-shadow-sheet: 0 -12px 40px rgba(0, 0, 0, 0.5);
+    --of-shadow-material-hover: 0 0 0 1px rgba(201, 168, 168, 0.45);
+    --of-shadow-tile-hover: 0 0 0 1px rgba(201, 168, 168, 0.5);
 
-    --of-ink-50: 10 11 12;
-    --of-ink-100: 22 24 25;
-    --of-ink-200: 38 41 42;
-    --of-ink-400: 120 126 124;
-    --of-ink-500: 156 163 161;
-    --of-ink-600: 210 214 212;
-    --of-ink-700: 228 232 230;
-    --of-ink-800: 240 244 242;
-    --of-ink-900: 244 246 245;
+    --of-ink-50: 42 40 48;
+    --of-ink-100: 55 53 62;
+    --of-ink-200: 68 68 78;
+    --of-ink-400: 154 161 159;
+    --of-ink-500: 180 187 186;
+    --of-ink-600: 200 208 206;
+    --of-ink-700: 216 222 220;
+    --of-ink-800: 232 237 235;
+    --of-ink-900: 232 237 235;
 
-    --of-brand-50: 16 22 20;
-    --of-brand-100: 28 36 33;
-    --of-brand-200: 48 64 58;
-    --of-brand-500: 112 138 128;
-    --of-brand-600: 143 171 160;
-    --of-brand-700: 176 198 188;
-    --of-brand-800: 210 224 218;
+    /* 500 = brand DNA #715A5A; 600 = CTA fill; 700/800 = active/text */
+    --of-brand-50: 52 44 48;
+    --of-brand-100: 68 56 58;
+    --of-brand-200: 110 86 86;
+    --of-brand-500: 113 90 90;
+    --of-brand-600: 139 110 110;
+    --of-brand-700: 201 168 168;
+    --of-brand-800: 220 196 196;
 
     color-scheme: dark;
   }
@@ -140,7 +141,7 @@
     background-color: var(--of-bg);
     background-image: radial-gradient(
       ellipse 70% 40% at 50% -20%,
-      rgba(61, 92, 78, 0.06),
+      rgba(113, 90, 90, 0.06),
       transparent 60%
     );
     transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
@@ -149,7 +150,7 @@
   .dark body {
     background-image: radial-gradient(
       ellipse 60% 35% at 50% -15%,
-      rgba(143, 171, 160, 0.07),
+      rgba(139, 110, 110, 0.12),
       transparent 55%
     );
   }
@@ -268,6 +269,11 @@
     background: var(--of-fill);
   }
 
+  /* Same height/padding as .of-field — for filter-bar clear actions */
+  .of-btn-field {
+    @apply of-btn-secondary w-full px-3.5 py-[0.7rem] text-[1rem] font-medium leading-normal tracking-normal;
+  }
+
   .of-btn-ghost {
     @apply of-btn text-ink-600;
     background: transparent;
@@ -336,7 +342,7 @@
   }
 
   .dark .of-scrim {
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.45);
   }
 
   .of-sheet {
@@ -427,33 +433,33 @@
   }
 
   .of-map-tile--desk {
-    border-color: #6b8f9e;
-    background: #e8eef0;
+    border-color: #8a8f94;
+    background: #ecebee;
   }
 
   .of-map-tile--room {
-    border-color: #8a7a5c;
-    background: #efeae2;
+    border-color: #8a7474;
+    background: #f0ebea;
   }
 
   .of-map-tile--parking {
-    border-color: #8a8f8c;
-    background: #eceeea;
+    border-color: #8a8c8e;
+    background: #ebeaed;
   }
 
   .dark .of-map-tile--desk {
-    border-color: #6d8a96;
-    background: #1c2428;
+    border-color: #a8adb2;
+    background: #4a4a56;
   }
 
   .dark .of-map-tile--room {
-    border-color: #9a8d72;
-    background: #24201c;
+    border-color: #c9a8a8;
+    background: #5a4c52;
   }
 
   .dark .of-map-tile--parking {
-    border-color: #7a827c;
-    background: #181a19;
+    border-color: #b4bbba;
+    background: #4e4e58;
   }
 
   .of-row {
@@ -553,33 +559,33 @@
   }
 
   .of-map-tile--desk:hover {
-    border-color: #557888;
-    background: #dce6ea;
+    border-color: #6f747a;
+    background: #e2e0e6;
   }
 
   .of-map-tile--room:hover {
-    border-color: #74664c;
-    background: #e6dfd4;
+    border-color: #715a5a;
+    background: #e8e0df;
   }
 
   .of-map-tile--parking:hover {
-    border-color: #6f7571;
-    background: #e2e5e1;
+    border-color: #6f7274;
+    background: #e2e1e5;
   }
 
   .dark .of-map-tile--desk:hover {
-    border-color: #8faba0;
-    background: #243035;
+    border-color: #c5cacd;
+    background: #555562;
   }
 
   .dark .of-map-tile--room:hover {
-    border-color: #b5a684;
-    background: #2e2923;
+    border-color: #dcc0c0;
+    background: #6a5a60;
   }
 
   .dark .of-map-tile--parking:hover {
-    border-color: #8faba0;
-    background: #1f2321;
+    border-color: #c5cccb;
+    background: #5a5a64;
   }
 
   .of-row:hover {

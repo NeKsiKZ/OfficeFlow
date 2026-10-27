@@ -21,12 +21,14 @@ You are an expert software architect and senior full-stack developer specializin
 5. Use asynchronous programming (`async`/`await`) for all I/O operations.
 6. Use FluentValidation for request validation.
 7. Auth/roles and UTC/clock: see `.cursor/rules/auth-and-roles.mdc` and `.cursor/rules/utc-and-clock.mdc`.
+8. Reservation lifecycle and space pricing/periods: see `.cursor/rules/reservation-lifecycle.mdc` and `.cursor/rules/space-pricing-periods.mdc`.
 
 # Frontend (React / TypeScript) Rules
 1. Always use TypeScript. Avoid `any` types. Define clear interfaces for DTOs matching the backend.
 2. Use functional components and React Hooks.
 3. Separate business logic from UI components (e.g., using custom hooks).
 4. Organize files by feature (e.g., `src/features/reservations`, `src/features/auth`) rather than by type.
+5. UI look & tokens: follow `.cursor/rules/ui-design-system.mdc` (dark-first palette, `--of-*` / `of-*`, anti-AI patterns).
 
 # Testing
 1. Backend: xUnit + FluentAssertions in `backend/OfficeFlow.Tests/`, mirroring Domain/Application structure.

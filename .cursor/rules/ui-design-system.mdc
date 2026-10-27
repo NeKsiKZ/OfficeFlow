@@ -1,0 +1,108 @@
+---
+description: OfficeFlow UI design system — dark-first palette, typography, and anti-AI visual rules
+globs: frontend/**/*.{tsx,ts,css,js}
+alwaysApply: true
+---
+
+# UI Design System (OfficeFlow)
+
+Dark-first, Apple-like: simple, premium, precise. Hierarchy via typography and spacing — not color noise or card stacks.
+
+When this rule is attached / always on: follow it for all frontend UI work. Prefer existing tokens (`--of-*`, `of-*` classes) over one-off styles.
+
+## Direction
+
+- Feel: professional, premium, precise, modern, calm
+- Product UI (app), not marketing landing — restraint over spectacle
+- References: Apple.com hero / mega-menu / bag (typography, hairlines, sparse accent)
+- Contrast first: canvas / surface / field / ink must stay clearly separated (avoid mid-gray mud)
+
+## Color (dark first)
+
+Brand DNA stays `#715A5A` (soft fills). UI uses lifted variants for readability.
+
+| Role | Token / HEX | Use |
+| --- | --- | --- |
+| Background | `--of-bg` `#2A2830` | App canvas (deeper than surfaces) |
+| Surface / tiles | `--of-bg-solid` `#44444E` | Panels, sheets, solid bars |
+| Elevated | `--of-bg-elevated` `rgba(68,68,78,0.94)` | Blurred toolbar / material |
+| Field | `--of-bg-field` `#37353E` | Inputs (recessed into surface) |
+| Ink | `--of-ink` `#E8EDEB` | Primary text / icons |
+| Ink muted | `--of-ink-secondary` `#B4BBBA` | Meta, inactive nav |
+| Ink tertiary | `#9AA19F` | Captions only |
+| Brand DNA | `#715A5A` | Soft backgrounds (`brand-soft`), identity |
+| Brand fill | `--of-brand` / `brand-600` `#8B6E6E` | Primary CTA, active nav pill |
+| Brand active/text | `brand-700` `#C9A8A8` | Text links, focus ring, selected map |
+| On accent | `--of-on-brand` `#F7F4F4` | Text on primary button |
+| Accent soft | `--of-brand-soft` `rgba(113,90,90,0.28)` | Focus ring soft fill |
+| Separator | `rgba(232,237,235,0.18)` | Hairlines |
+| Danger | `#E08A8A` | Errors / destructive |
+| Success | soft brand-adjacent, not loud green SaaS |
+
+Light mode (fallback): bg `#F3F2F4`, surface `#FFFFFF`, field `#E9E8EB`, ink `#2A282E`, brand fill `#8B6E6E`.
+
+Do not invent new accent hues. Map tiles use ink/brand soft tones — not pastel SaaS greens/blues. Space tiles must read lighter than the map floor.
+
+## Typography
+
+Use system SF stack (do not host SF Pro as a webfont):
+
+```css
+font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+  "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+```
+
+| Style | Size | Weight | Tracking |
+| --- | --- | --- | --- |
+| Display | 28–32px | 600 | -0.02em |
+| Title | 20–22px | 600 | -0.015em |
+| Body | 15px | 400 | 0 |
+| Caption / label | 12–13px | 500 | ~0.01em |
+
+Prefer `of-display`, `of-title`, `of-body`, `of-caption`, `of-label`. Importance = size/weight, not extra color.
+
+## Shape & controls (CTA)
+
+- **App primary / secondary buttons:** `border-radius: 12px` (`rounded-control`)
+- **Nav chips only:** pill `980px` (`rounded-pill` / `of-nav-pill`)
+- Primary fill: `#8B6E6E` + on-brand text
+- Secondary: ghost / fill (`--of-fill`)
+- Active nav: `bg-brand-600` + `on-brand` (not dark DNA `#715A5A` on dark canvas)
+- Text actions: `text-brand-700` (`#C9A8A8` in dark)
+
+## Layout & surfaces
+
+- One job per section; generous spacing; avoid nested cards
+- Surfaces: `#44444E` + hairline — **no multi-layer drop shadows**
+- Material/toolbar: light blur OK; do not glassmorph everything
+- Overlays: scrim + blur
+- Dividers: hairlines with enough alpha to stay visible
+
+## Motion
+
+- Press feedback: `scale(0.97)` ~120ms ease-out
+- Sheets/drawers: existing drawer curve
+- Respect `prefers-reduced-motion`
+
+## Anti-patterns
+
+- Purple/indigo gradients, glow, neon
+- Inter/Roboto as brand font
+- Cards everywhere; emoji in chrome
+- Using DNA `#715A5A` as the only interactive fill on dark (too muddy)
+- Flat mid-gray stack (bg ≈ surface ≈ field ≈ muted text)
+
+```tsx
+// ❌ BAD
+<div className="rounded-2xl bg-purple-600 shadow-xl shadow-purple-500/30">…
+
+// ✅ GOOD
+<button className="of-btn-primary">Confirm</button>
+<section className="of-surface">…</section>
+```
+
+## Implementation notes
+
+- Source of truth: `frontend/src/index.css` + `frontend/tailwind.config.js`
+- Change tokens first, then components — no ad-hoc HEX in feature TSX
+- This rule is always applied (`alwaysApply: true`); also linked from `.cursorrules`

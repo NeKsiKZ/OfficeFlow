@@ -18,7 +18,7 @@ export function getStoredThemePreference(): ThemePreference {
 
 export function getSystemTheme(): ResolvedTheme {
   if (typeof window === 'undefined' || !window.matchMedia) {
-    return 'light'
+    return 'dark'
   }
 
   return window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -35,7 +35,7 @@ export function applyResolvedTheme(resolved: ResolvedTheme): void {
   root.classList.toggle('dark', resolved === 'dark')
   root.style.colorScheme = resolved
 
-  const themeColor = resolved === 'dark' ? '#050607' : '#f3f4f3'
+  const themeColor = resolved === 'dark' ? '#2A2830' : '#F3F2F4'
   document
     .querySelectorAll('meta[name="theme-color"]')
     .forEach((meta) => meta.setAttribute('content', themeColor))

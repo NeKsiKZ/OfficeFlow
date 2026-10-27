@@ -31,13 +31,11 @@ export default {
       },
       fontFamily: {
         sans: [
-          'ui-sans-serif',
-          'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
           '"SF Pro Text"',
+          '"SF Pro Display"',
           '"Segoe UI"',
-          'Roboto',
           '"Helvetica Neue"',
           'Arial',
           'sans-serif',

@@ -1,0 +1,46 @@
+---
+description: Space-type pricing models and reservation period rules
+alwaysApply: true
+---
+
+# Space Pricing & Periods
+
+Billing and period validation depend on `SpaceType`. Do not mix models across types.
+
+## By space type
+
+| Type | Rate | Period | Domain helpers |
+| --- | --- | --- | --- |
+| `Room` | `MonthlySubscriptionRate` | Exact calendar months (`DateRange.ForCalendarMonths`) | `Room.Min/MaxSubscriptionMonths` (1–24) |
+| `Desk` | `HourlyRate` | Continuous hours | `HourlyReservationPeriodRules` (typically 1–12 h) |
+| `ParkingSpace` | `HourlyRate` | Continuous hours | Same hourly rules as desks |
+
+## Cost
+
+- Space cost: `space.CalculateCost(period)`.
+- Additional services:
+  - **Room:** service price × exact month count.
+  - **Desk / Parking:** service price once per reservation.
+- Services must `AppliesTo(spaceType)` via `ApplicableSpaceTypes` — reject mismatches in domain/create flow.
+
+## Frontend / API
+
+- Room booking UI: start date + month count (not free-form end datetime).
+- Desk/Parking UI: start + end datetime (hourly).
+- Filter optional services by space type before showing checkboxes.
+- Stats/revenue use stored `TotalCost`; do not re-derive period rules ad hoc in the UI for billing.
+
+```csharp
+// ✅ GOOD — room
+var period = DateRange.ForCalendarMonths(startUtc, monthCount);
+room.EnsureValidReservationPeriod(period, clockUtc);
+
+// ✅ GOOD — desk/parking
+desk.EnsureValidReservationPeriod(new DateRange(startUtc, endUtc), clockUtc);
+
+// ❌ BAD — hourly end datetime for rooms, or monthly math for desks
+```
+
+## Clocks
+
+Period “not in the past” checks use UTC and an injectable/fixed clock — see `utc-and-clock.mdc`.
